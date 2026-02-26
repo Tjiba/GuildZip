@@ -55,6 +55,10 @@ public class ChatHudMixin {
     private static final String[] RANDOM_COLORS = {
         "1", "2", "3", "4", "5", "6", "9", "a", "b", "c", "d", "e", "f"
     };
+    
+    // Pattern to detect and filter the Discord security warning message
+    @Unique
+    private static final Pattern DISCORD_WARNING_MESSAGE = Pattern.compile("^Please be mindful of Discord links in chat as they may pose a security risk");
 
     @ModifyVariable(
         method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V",
@@ -67,6 +71,11 @@ public class ChatHudMixin {
         // 1. Texte brut sans codes couleur
         String raw = COLOR_CODE.matcher(original.getString()).replaceAll("");
         raw = raw.replaceAll("\\s+", " ").trim();
+        
+        // Filter out the Discord security warning message
+        if (DISCORD_WARNING_MESSAGE.matcher(raw).matches()) {
+            return null; // Hide this message
+        }
 
         // 2. Seulement les messages de guild / officer (longues formes ou abrégées)
         if (!raw.startsWith("Guild > ") && !raw.startsWith("Officer > ") 
