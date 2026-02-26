@@ -56,9 +56,9 @@ public class ChatHudMixin {
         "1", "2", "3", "4", "5", "6", "9", "a", "b", "c", "d", "e", "f"
     };
     
-    // Pattern to detect and filter the Discord security warning message
+    // Pattern to remove the Discord security warning message that gets appended by Hypixel
     @Unique
-    private static final Pattern DISCORD_WARNING_MESSAGE = Pattern.compile("^Please be mindful of Discord links in chat as they may pose a security risk");
+    private static final Pattern DISCORD_WARNING_SUFFIX = Pattern.compile("\\s*Please be mindful of Discord links in chat as they may pose a security risk\\s*$");
 
     @ModifyVariable(
         method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V",
@@ -67,15 +67,21 @@ public class ChatHudMixin {
     )
     private Text onAddMessage(Text original) {
         if (original == null) return null;
+        
+        // Remove Discord warning suffix from the original message text
+        String originalString = original.getString();
+        if (originalString.contains("Please be mindful of Discord links")) {
+            originalString = DISCORD_WARNING_SUFFIX.matcher(originalString).replaceAll("");
+            original = Text.literal(originalString);
+        }
 
         // 1. Texte brut sans codes couleur
         String raw = COLOR_CODE.matcher(original.getString()).replaceAll("");
         raw = raw.replaceAll("\\s+", " ").trim();
         
-        // Filter out the Discord security warning message
-        if (DISCORD_WARNING_MESSAGE.matcher(raw).matches()) {
-            return null; // Hide this message
-        }
+        // Remove the Discord security warning suffix that Hypixel appends (additional safety check)
+        raw = DISCORD_WARNING_SUFFIX.matcher(raw).replaceAll("");
+        raw = raw.trim();
 
         // 2. Seulement les messages de guild / officer (longues formes ou abrégées)
         if (!raw.startsWith("Guild > ") && !raw.startsWith("Officer > ") 
