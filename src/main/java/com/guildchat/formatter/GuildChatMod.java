@@ -64,12 +64,12 @@ public class GuildChatMod implements ClientModInitializer {
                 ClientCommandManager.literal("gcs")
                     .executes(ctx -> {
                         MinecraftClient client = ctx.getSource().getClient();
-                        if (!isModMenuLoaded()) {
-                            feedback(client, "Mod Menu is not installed.");
-                            return 0;
+                        if (isModMenuLoaded()) {
+                            pendingConfigModId = "guildchat-shortener";
+                            return 1;
                         }
-                        pendingConfigModId = "guildchat-shortener";
-                        return 1;
+                        feedback(client, "Mod Menu is not installed.");
+                        return 0;
                     })
             )
         );
@@ -79,12 +79,12 @@ public class GuildChatMod implements ClientModInitializer {
                 ClientCommandManager.literal("guildchatshortener")
                     .executes(ctx -> {
                         MinecraftClient client = ctx.getSource().getClient();
-                        if (!isModMenuLoaded()) {
-                            feedback(client, "Mod Menu is not installed.");
-                            return 0;
+                        if (isModMenuLoaded()) {
+                            pendingConfigModId = "guildchat-shortener";
+                            return 1;
                         }
-                        pendingConfigModId = "guildchat-shortener";
-                        return 1;
+                        feedback(client, "Mod Menu is not installed.");
+                        return 0;
                     })
             )
         );
