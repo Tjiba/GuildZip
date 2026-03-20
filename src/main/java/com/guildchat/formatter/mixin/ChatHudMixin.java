@@ -63,6 +63,9 @@ public class ChatHudMixin {
     @Unique
     private static final Pattern GUILD_VERSION_TAG = Pattern.compile("^\\[(V[123])]\\s+", Pattern.CASE_INSENSITIVE);
 
+    @Unique
+    private static final Pattern CHAT_TIMESTAMP_PREFIX = Pattern.compile("^\\[[0-2]\\d:[0-5]\\d:[0-5]\\d]\\s+");
+
     @ModifyVariable(
         method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V",
         at = @At("HEAD"),
@@ -81,7 +84,10 @@ public class ChatHudMixin {
         // 1. Texte brut sans codes couleur
         String raw = COLOR_CODE.matcher(original.getString()).replaceAll("");
         raw = raw.replaceAll("\\s+", " ").trim();
-        
+
+        // Remove leading chat timestamp like [22:00:25]
+        raw = CHAT_TIMESTAMP_PREFIX.matcher(raw).replaceFirst("");
+
         // Remove the Discord security warning suffix that Hypixel appends (additional safety check)
         raw = DISCORD_WARNING_SUFFIX.matcher(raw).replaceAll("");
         raw = raw.trim();

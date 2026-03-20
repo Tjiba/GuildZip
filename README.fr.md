@@ -66,7 +66,6 @@ Vous pouvez aussi modifier les réglages depuis ModMenu (Cloth Config est requis
 ```
 /bridge status            # Affiche la configuration
 /gcs                      # Ouvre la config du mod
-/guildchatshortener       # Ouvre la config du mod
 ```
 
 Modifie les couleurs, alias et options via Mod Menu (Cloth Config requis).
