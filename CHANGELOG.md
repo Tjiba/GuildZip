@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 - 2026-03-20
+- ✨ V1/V2/V3 labels display correctly even with a custom bridge alias
+- ⚙️ Config access via Mod Menu (Cloth Config required)
+- ✅ New shortcuts: `/gcs` and `/guildchatshortener` to open config
+- 🧹 Command list trimmed to `/bridge status` plus config shortcuts
+- 📚 Documentation cleaned for the release
+
 ## 1.2.4 - 2026-02-18
 - 🔥 **MAJOR**: Version is now read dynamically from mod metadata
 - 🐛 **FIX**: No more version synchronization issues between code and gradle.properties
@@ -56,4 +63,3 @@
 - Added /bridgeactivateall to format normal guild messages
 - Improved Discord bridge message detection (roles and formats)
 - Simplified /bridge status and shows active mode
-
