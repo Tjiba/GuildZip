@@ -11,6 +11,7 @@
 [![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.oracle.com/java/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Config](https://img.shields.io/badge/Config-ModMenu%20%2B%20Cloth%20Config-blue.svg)](https://www.curseforge.com/minecraft/mc-mods/modmenu)
+[![Build Mod](https://github.com/Tjiba/GuildChatShortener/actions/workflows/build.yml/badge.svg)](https://github.com/Tjiba/GuildChatShortener/actions/workflows/build.yml)
 
 **English** | [Français](README.fr.md)
 
