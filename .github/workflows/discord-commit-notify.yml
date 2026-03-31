@@ -1,0 +1,77 @@
+name: Discord Commit Notify
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+
+jobs:
+  notify-discord:
+    if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send structured commit message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ github.sha }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL", "")
+          if not webhook:
+              raise SystemExit("Missing DISCORD_WEBHOOK_URL")
+
+          repo = os.environ.get("REPOSITORY", "")
+          branch = os.environ.get("BRANCH", "")
+          actor = os.environ.get("ACTOR", "")
+          sha = os.environ.get("SHA", "")
+          short_sha = sha[:7] if sha else "unknown"
+          commit_url = f"https://github.com/{repo}/commit/{sha}" if repo and sha else "https://github.com"
+
+          commit_message = (os.environ.get("COMMIT_MESSAGE", "(no commit message)") or "(no commit message)").strip()
+          if len(commit_message) > 240:
+              commit_message = commit_message[:237] + "..."
+
+          payload = {
+              "username": "GitHub Actions",
+              "embeds": [
+                  {
+                      "title": "🚀 Nouveau commit pousse",
+                      "description": f"📝 {commit_message}\n\n🔗 [Voir le commit]({commit_url})",
+                      "color": 5814783,
+                      "fields": [
+                          {"name": "📦 Repository", "value": repo or "unknown", "inline": True},
+                          {"name": "🌿 Branch", "value": branch or "unknown", "inline": True},
+                          {"name": "👤 Author", "value": actor or "unknown", "inline": True},
+                          {"name": "🧩 Commit", "value": f"`{short_sha}`", "inline": True},
+                      ],
+                      "timestamp": os.environ.get("COMMIT_TIMESTAMP") or None,
+                  }
+              ],
+          }
+
+          body = json.dumps(payload).encode("utf-8")
+          request = urllib.request.Request(
+              webhook,
+              data=body,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+
+          with urllib.request.urlopen(request) as response:
+              status_code = response.getcode()
+              if status_code < 200 or status_code >= 300:
+                  raise SystemExit(f"Discord webhook failed with status code {status_code}")
+          PY
