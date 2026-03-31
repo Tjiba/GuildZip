@@ -49,6 +49,9 @@ public class BridgeConfig {
     // Langue de l'interface (english ou french)
     public String language = "english";
 
+    // Active le téléchargement automatique de la dernière version stable lorsqu'elle est disponible
+    public boolean autoUpdaterEnabled = true;
+
     // Active l'affichage de la version de guilde (v1/v2/v3) a la place de l'alias bridge
     public boolean versionFormattingEnabled = true;
 

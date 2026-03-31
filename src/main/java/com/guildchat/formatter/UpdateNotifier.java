@@ -1,5 +1,6 @@
 package com.guildchat.formatter;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -7,125 +8,106 @@ import net.minecraft.text.Text;
 public class UpdateNotifier {
     
     private static boolean hasChecked = false;
+    private static boolean updatePendingRestart = false;
     
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             // Afficher le message de mise à jour au premier join du serveur
             if (!hasChecked && client.player != null) {
                 hasChecked = true;
-                
-                // Vérifier la version en ligne de manière asynchrone
-                VersionManager.checkVersionUpdateAsync();
-                
-                // Vérifier après un court délai si une nouvelle version a été trouvée
-                scheduleVersionCheckMessage(client);
+
+                runUpdateFlow(client, false);
+            }
+        });
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            if (updatePendingRestart && isHypixelServer(client)) {
+                sendClientMessage(client, Messages.get(Messages.UPDATE_RESTART_ON_HYPIXEL_JOIN));
             }
         });
     }
-    
-    /**
-     * Affiche le message de mise à jour après vérification en ligne
-     * Affiche un message pour update disponible OU version dev
-     */
-    private static void scheduleVersionCheckMessage(MinecraftClient client) {
-        Thread delayedCheck = new Thread(() -> {
-            try {
-                // Attendre 3 secondes pour que la requête HTTP se termine
-                Thread.sleep(3000);
-                
-                String latestVersion = VersionManager.getLatestVersionOnline();
-                if (latestVersion != null && client.player != null) {
-                    int comparison = VersionManager.compareVersions(VersionManager.CURRENT_VERSION, latestVersion);
-                    
-                    if (comparison < 0) {
-                        // Mise à jour disponible
-                        client.player.sendMessage(
-                            Text.literal(Messages.format(Messages.UPDATE_AVAILABLE, 
-                                latestVersion, VersionManager.CURRENT_VERSION)),
-                            false
-                        );
-                        client.player.sendMessage(
-                            Text.literal(Messages.get(Messages.UPDATE_MODRINTH)),
-                            false
-                        );
-                    } else if (comparison > 0) {
-                        // Version dev
-                        client.player.sendMessage(
-                            Text.literal(Messages.format(Messages.UPDATE_DEV_VERSION, 
-                                VersionManager.CURRENT_VERSION, latestVersion)),
-                            false
-                        );
-                    }
-                    // Silencieux si versions égales (à jour)
+
+    private static boolean isHypixelServer(MinecraftClient client) {
+        if (client == null || client.getCurrentServerEntry() == null || client.getCurrentServerEntry().address == null) {
+            return false;
+        }
+        String address = client.getCurrentServerEntry().address.toLowerCase();
+        return address.contains("hypixel.net");
+    }
+
+    private static void runUpdateFlow(MinecraftClient client, boolean manual) {
+        VersionManager.resetVersionCache();
+        String currentVersion = VersionManager.CURRENT_VERSION != null ? VersionManager.CURRENT_VERSION : "unknown";
+
+        VersionManager.checkVersionUpdateAsyncInternal().thenRun(() -> {
+            String latestVersion = VersionManager.getLatestVersionOnline();
+            if (latestVersion == null) {
+                if (manual) {
+                    sendClientMessage(client, Messages.get(Messages.UPDATE_CHECK_FAILED));
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                return;
+            }
+
+            int comparison = VersionManager.compareVersions(currentVersion, latestVersion);
+
+            if (comparison < 0) {
+                sendClientMessage(client,
+                    Messages.format(Messages.UPDATE_AVAILABLE, latestVersion, currentVersion));
+                sendClientMessage(client, Messages.get(Messages.UPDATE_MODRINTH));
+
+                if (BridgeConfig.get().autoUpdaterEnabled) {
+                    startAutoDownload(client, latestVersion);
+                }
+                return;
+            }
+
+            if (comparison > 0) {
+                sendClientMessage(client,
+                    Messages.format(Messages.UPDATE_DEV_VERSION, currentVersion, latestVersion));
+                return;
+            }
+
+            if (manual) {
+                sendClientMessage(client,
+                    Messages.format(Messages.UPDATE_UP_TO_DATE, currentVersion));
             }
         });
-        delayedCheck.setDaemon(true);
-        delayedCheck.start();
+    }
+
+    private static void startAutoDownload(MinecraftClient client, String latestVersion) {
+        VersionManager.ReleaseInfo releaseInfo = VersionManager.getLatestReleaseInfo();
+        if (releaseInfo == null || releaseInfo.getJarDownloadUrl() == null || releaseInfo.getJarName() == null) {
+            sendClientMessage(client, Messages.get(Messages.UPDATE_AUTO_NOT_AVAILABLE));
+            return;
+        }
+
+        sendClientMessage(client, Messages.format(Messages.UPDATE_AUTO_START, latestVersion));
+
+        UpdateDownloader.downloadLatestReleaseAsync().thenAccept(result -> {
+            if (result.isSuccess()) {
+                updatePendingRestart = true;
+                sendClientMessage(client, Messages.format(Messages.UPDATE_AUTO_SUCCESS, result.getMessage()));
+                sendClientMessage(client, Messages.get(Messages.UPDATE_RESTART_REQUIRED));
+            } else {
+                sendClientMessage(client, Messages.format(Messages.UPDATE_AUTO_FAILED, result.getMessage()));
+            }
+        });
+    }
+
+    private static void sendClientMessage(MinecraftClient client, String msg) {
+        if (client == null) return;
+        client.execute(() -> {
+            if (client.player != null) {
+                client.player.sendMessage(Text.literal(msg), false);
+            }
+        });
     }
     
     /**
      * Vérifie manuellement les mises à jour (pour commande)
      */
     public static void checkUpdateManually(MinecraftClient client) {
-        if (client.player != null) {
-            client.player.sendMessage(
-                Text.literal(Messages.get(Messages.UPDATE_CHECKING)),
-                false
-            );
-        }
-        
-        // Réinitialiser le cache pour forcer une nouvelle vérification
-        VersionManager.resetVersionCache();
-        
-        // Utiliser CompletableFuture pour éviter le busy-waiting
-        VersionManager.checkVersionUpdateAsyncInternal().thenRun(() -> {
-            String latestVersion = VersionManager.getLatestVersionOnline();
-            if (latestVersion != null) {
-                int comparison = VersionManager.compareVersions(VersionManager.CURRENT_VERSION, latestVersion);
-                
-                if (comparison < 0) {
-                    // Update available
-                    if (client.player != null) {
-                        client.player.sendMessage(
-                            Text.literal(Messages.format(Messages.UPDATE_AVAILABLE, 
-                                latestVersion, VersionManager.CURRENT_VERSION)),
-                            false
-                        );
-                        client.player.sendMessage(
-                            Text.literal(Messages.get(Messages.UPDATE_MODRINTH)),
-                            false
-                        );
-                    }
-                } else if (comparison > 0) {
-                    // Development version
-                    if (client.player != null) {
-                        client.player.sendMessage(
-                            Text.literal(Messages.format(Messages.UPDATE_DEV_VERSION, 
-                                VersionManager.CURRENT_VERSION, latestVersion)),
-                            false
-                        );
-                    }
-                } else {
-                    // Up to date
-                    if (client.player != null) {
-                        client.player.sendMessage(
-                            Text.literal(Messages.format(Messages.UPDATE_UP_TO_DATE, 
-                                VersionManager.CURRENT_VERSION)),
-                            false
-                        );
-                    }
-                }
-            } else {
-                if (client.player != null) {
-                    client.player.sendMessage(
-                        Text.literal(Messages.get(Messages.UPDATE_CHECK_FAILED)),
-                        false
-                    );
-                }
-            }
-        });
+        sendClientMessage(client, Messages.get(Messages.UPDATE_CHECKING));
+        runUpdateFlow(client, true);
     }
 }

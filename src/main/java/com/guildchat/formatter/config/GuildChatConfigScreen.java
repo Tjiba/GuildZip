@@ -234,6 +234,13 @@ public class GuildChatConfigScreen {
                 .setTooltip(Text.literal("Interface language (english / french)"))
                 .build());
 
+        advanced.addEntry(ENTRY_BUILDER
+                .startBooleanToggle(Text.literal("Enable Auto-Updater"), BridgeConfig.get().autoUpdaterEnabled)
+                .setDefaultValue(true)
+                .setSaveConsumer(value -> BridgeConfig.get().autoUpdaterEnabled = value)
+                .setTooltip(Text.literal("Automatically download the latest release jar into the mods folder"))
+                .build());
+
         return builder.build();
     }
 }

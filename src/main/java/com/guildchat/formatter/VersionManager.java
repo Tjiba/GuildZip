@@ -2,6 +2,8 @@ package com.guildchat.formatter;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -12,6 +14,30 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.CompletableFuture;
 
 public class VersionManager {
+
+    public static class ReleaseInfo {
+        private final String version;
+        private final String jarName;
+        private final String jarDownloadUrl;
+
+        public ReleaseInfo(String version, String jarName, String jarDownloadUrl) {
+            this.version = version;
+            this.jarName = jarName;
+            this.jarDownloadUrl = jarDownloadUrl;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public String getJarName() {
+            return jarName;
+        }
+
+        public String getJarDownloadUrl() {
+            return jarDownloadUrl;
+        }
+    }
     
     // Version dynamique lue depuis fabric.mod.json au lieu d'être codée en dur
     public static final String CURRENT_VERSION = FabricLoader.getInstance()
@@ -22,6 +48,7 @@ public class VersionManager {
     private static final String GITHUB_API_URL = "https://api.github.com/repos/Tjiba/GuildChatShortener/releases/latest";
     
     private static String latestVersionOnline = null;
+    private static ReleaseInfo latestReleaseInfo = null;
     
     /**
      * Vérifie la version en ligne de manière asynchrone
@@ -40,18 +67,19 @@ public class VersionManager {
                 GuildChatMod.LOGGER.info("Checking for updates from GitHub...");
                 GuildChatMod.LOGGER.info("Current version: " + CURRENT_VERSION);
                 
-                String latestVersion = fetchLatestVersionFromGitHub();
-                if (latestVersion != null) {
-                    latestVersionOnline = latestVersion;
-                    GuildChatMod.LOGGER.info("Latest version on GitHub: " + latestVersion);
+                ReleaseInfo releaseInfo = fetchLatestReleaseFromGitHub();
+                if (releaseInfo != null && releaseInfo.getVersion() != null) {
+                    latestReleaseInfo = releaseInfo;
+                    latestVersionOnline = releaseInfo.getVersion();
+                    GuildChatMod.LOGGER.info("Latest version on GitHub: " + latestVersionOnline);
                     
-                    int comparison = compareVersions(CURRENT_VERSION, latestVersion);
+                    int comparison = compareVersions(CURRENT_VERSION, latestVersionOnline);
                     if (comparison < 0) {
                         // Current version is older, update available
-                        showUpdateMessage(latestVersion);
+                        showUpdateMessage(latestVersionOnline);
                     } else if (comparison > 0) {
                         // Current version is newer (dev version)
-                        showDevVersionMessage(latestVersion);
+                        showDevVersionMessage(latestVersionOnline);
                     } else {
                         GuildChatMod.LOGGER.info("Version is up to date!");
                     }
@@ -67,7 +95,7 @@ public class VersionManager {
     /**
      * Récupère la dernière version depuis l'API GitHub
      */
-    private static String fetchLatestVersionFromGitHub() throws Exception {
+    private static ReleaseInfo fetchLatestReleaseFromGitHub() throws Exception {
         GuildChatMod.LOGGER.info("Fetching from: " + GITHUB_API_URL);
         
         var url = new URI(GITHUB_API_URL).toURL();
@@ -102,7 +130,31 @@ public class VersionManager {
                 GuildChatMod.LOGGER.info("Found tag: " + tagName);
                 
                 // Nettoyer le tag (enlever le "v" s'il existe)
-                return tagName.startsWith("v") ? tagName.substring(1) : tagName;
+                String version = tagName.startsWith("v") ? tagName.substring(1) : tagName;
+                ReleaseInfo releaseInfo = new ReleaseInfo(version, null, null);
+
+                if (json.has("assets") && json.get("assets").isJsonArray()) {
+                    JsonArray assets = json.getAsJsonArray("assets");
+                    for (JsonElement element : assets) {
+                        if (!element.isJsonObject()) continue;
+                        JsonObject asset = element.getAsJsonObject();
+                        if (!asset.has("name") || !asset.has("browser_download_url")) continue;
+
+                        String name = asset.get("name").getAsString();
+                        String downloadUrl = asset.get("browser_download_url").getAsString();
+                        String lowered = name.toLowerCase();
+
+                        if (lowered.endsWith(".jar")
+                                && !lowered.contains("sources")
+                                && !lowered.contains("javadoc")) {
+                            releaseInfo = new ReleaseInfo(version, name, downloadUrl);
+                            GuildChatMod.LOGGER.info("Selected release asset: " + name);
+                            break;
+                        }
+                    }
+                }
+
+                return releaseInfo;
             }
         } else {
             GuildChatMod.LOGGER.warn("GitHub API returned non-200 code: " + responseCode);
@@ -136,12 +188,17 @@ public class VersionManager {
     public static String getLatestVersionOnline() {
         return latestVersionOnline;
     }
+
+    public static ReleaseInfo getLatestReleaseInfo() {
+        return latestReleaseInfo;
+    }
     
     /**
      * Réinitialise le cache de version (utile pour forcer une nouvelle vérification)
      */
     public static void resetVersionCache() {
         latestVersionOnline = null;
+        latestReleaseInfo = null;
     }
     
     /**

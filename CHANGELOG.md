@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1 - 2026-03-31
+- 🤖 Added auto-updater: checks latest GitHub release and can auto-download the JAR into `mods/`
+- ⚙️ Added `Enable Auto-Updater` toggle in Mod Menu (Advanced)
+- 💬 Added `/gcs update` and `/guildchatshortener update` commands for manual trigger
+- 🧹 Reworked update flow to async callbacks (removed sleep-based notifier)
+
 ## 1.3.0 - 2026-03-20
 - ✨ V1/V2/V3 labels display correctly even with a custom bridge alias 
 - ⚙️ Config access via Mod Menu (Cloth Config required)

@@ -63,8 +63,11 @@
 ### Essential Commands
 
 ```
-/bridge status            # Show configuration
+/gcs status               # Show configuration
+/gcs update               # Check updates and run auto-updater
 /gcs                      # Open this mod's config screen
+/guildchatshortener status# Show configuration
+/guildchatshortener update# Check updates and run auto-updater
 /guildchatshortener       # Open this mod's config screen
 ```
 
