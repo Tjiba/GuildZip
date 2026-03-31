@@ -75,7 +75,7 @@ jobs:
                 },
                 "description": "✨ **Nouveau commit sur** `\($branch)`\n\n📝 \(($msg | gsub("\\n"; " ") | if length > 220 then .[0:217] + "..." else . end))\n\n🔗 [Voir le commit](\($url))",
                 "thumbnail": {
-                  "url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                  "url": $avatar
                 },
                 "fields": [
                   {"name": "🌿 Branche", "value": "`\($branch)`", "inline": true},
@@ -96,6 +96,7 @@ jobs:
               -d "$JSON_PAYLOAD" \
               "$DISCORD_WEBHOOK"
           fi
+
 
 
 
