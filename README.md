@@ -23,7 +23,7 @@
 
 ## 📖 Description
 
-**GuildChat Shortener** is a Fabric client-side mod that transforms long Discord bridge messages and regular guild messages in your Hypixel guild into short and elegant messages. No more cluttered chat - customize the display with colors and aliases to your liking!
+**GuildChat Shortener** is a Fasaaaabric client-side mod that transforms long Discord bridge messages and regular guild messages in your Hypixel guild into short and elegant messages. No more cluttered chat - customize the display with colors and aliases to your liking!
 
 ### ✨ Key Features
 
