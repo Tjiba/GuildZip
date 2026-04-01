@@ -67,7 +67,7 @@ public class UpdateDownloader {
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(15000);
-            connection.setRequestProperty("User-Agent", "GuildChatShortener-Mod-Updater");
+            connection.setRequestProperty("User-Agent", "GuildZip-Mod-Updater");
 
             int responseCode = connection.getResponseCode();
             if (responseCode < 200 || responseCode >= 300) {

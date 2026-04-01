@@ -41,11 +41,11 @@ public class VersionManager {
     
     // Version dynamique lue depuis fabric.mod.json au lieu d'être codée en dur
     public static final String CURRENT_VERSION = FabricLoader.getInstance()
-            .getModContainer("guildchat-shortener")
+            .getModContainer("guildzip")
             .map(container -> container.getMetadata().getVersion().getFriendlyString())
             .orElse("unknown");
     
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/Tjiba/GuildChatShortener/releases/latest";
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/Tjiba/GuildZip/releases/latest";
     
     private static String latestVersionOnline = null;
     private static ReleaseInfo latestReleaseInfo = null;
@@ -103,7 +103,7 @@ public class VersionManager {
         connection.setRequestMethod("GET");
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(5000);
-        connection.setRequestProperty("User-Agent", "GuildChatShortener-Mod");
+        connection.setRequestProperty("User-Agent", "GuildZip-Mod");
         
         int responseCode = connection.getResponseCode();
         GuildChatMod.LOGGER.info("GitHub API response code: " + responseCode);
@@ -169,7 +169,7 @@ public class VersionManager {
      */
     private static void showUpdateMessage(String newVersion) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            GuildChatMod.LOGGER.info("Guild Chat Shortener update available! New version: " + newVersion + " (current: " + CURRENT_VERSION + ")");
+            GuildChatMod.LOGGER.info("GuildZip update available! New version: " + newVersion + " (current: " + CURRENT_VERSION + ")");
         }
     }
     
@@ -178,7 +178,7 @@ public class VersionManager {
      */
     private static void showDevVersionMessage(String releaseVersion) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            GuildChatMod.LOGGER.info("Guild Chat Shortener: Dev version " + CURRENT_VERSION + " > " + releaseVersion + " (release)");
+            GuildChatMod.LOGGER.info("GuildZip: Dev version " + CURRENT_VERSION + " > " + releaseVersion + " (release)");
         }
     }
     

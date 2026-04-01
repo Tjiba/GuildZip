@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 
 public class GuildChatMod implements ClientModInitializer {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("guildchat-formatter");
+    public static final Logger LOGGER = LoggerFactory.getLogger("guildzip");
 
     private static String pendingConfigModId = null;
 
@@ -29,13 +29,7 @@ public class GuildChatMod implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
             dispatcher.register(
-                ClientCommandManager.literal("gcs")
-                    .then(ClientCommandManager.literal("status")
-                        .executes(ctx -> {
-                            showStatus(ctx.getSource().getClient());
-                            return 1;
-                        })
-                    )
+                ClientCommandManager.literal("gz")
                     .then(ClientCommandManager.literal("update")
                         .executes(ctx -> {
                             UpdateNotifier.checkUpdateManually(ctx.getSource().getClient());
@@ -45,34 +39,7 @@ public class GuildChatMod implements ClientModInitializer {
                     .executes(ctx -> {
                         MinecraftClient client = ctx.getSource().getClient();
                         if (isModMenuLoaded()) {
-                            pendingConfigModId = "guildchat-shortener";
-                            return 1;
-                        }
-                        feedback(client, "Mod Menu is not installed.");
-                        return 0;
-                    })
-            )
-        );
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(
-                ClientCommandManager.literal("guildchatshortener")
-                    .then(ClientCommandManager.literal("status")
-                        .executes(ctx -> {
-                            showStatus(ctx.getSource().getClient());
-                            return 1;
-                        })
-                    )
-                    .then(ClientCommandManager.literal("update")
-                        .executes(ctx -> {
-                            UpdateNotifier.checkUpdateManually(ctx.getSource().getClient());
-                            return 1;
-                        })
-                    )
-                    .executes(ctx -> {
-                        MinecraftClient client = ctx.getSource().getClient();
-                        if (isModMenuLoaded()) {
-                            pendingConfigModId = "guildchat-shortener";
+                            pendingConfigModId = "guildzip";
                             return 1;
                         }
                         feedback(client, "Mod Menu is not installed.");

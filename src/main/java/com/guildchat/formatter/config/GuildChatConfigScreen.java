@@ -63,7 +63,7 @@ public class GuildChatConfigScreen {
     public static Screen create(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Text.literal("Guild Chat Shortener"))
+                .setTitle(Text.literal("GuildZip"))
                 .setSavingRunnable(() -> {
                     BridgeConfig.get().save();
                     BridgeConfig.reload();

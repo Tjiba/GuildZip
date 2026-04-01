@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "guildchat-shortener",
+  "id": "guildzip",
   "version": "${version}",
-  "name": "Guild Chat Shortener",
-  "description": "Formate les messages bridge Discord dans la guild Hypixel. Commandes: /bridge status, /gcs, /guildchatshortener",
+  "name": "GuildZip",
+  "description": "Formate les messages bridge Discord dans la guild Hypixel. Commandes: /gz, /gz update",
   "authors": ["Tjiba"],
   "license": "MIT",
   "icon": "icon.png",
@@ -12,7 +12,7 @@
     "client": ["com.guildchat.formatter.GuildChatMod"],
     "modmenu": ["com.guildchat.formatter.config.ModMenuIntegration"]
   },
-  "mixins": ["guildchat-shortener.mixins.json"],
+  "mixins": ["guildzip.mixins.json"],
   "depends": {
     "fabricloader": ">=0.18.0",
     "minecraft": "~1.21",
@@ -20,6 +20,6 @@
     "fabric-api": "*"
   },
   "contact": {
-    "website": "https://modrinth.com/mod/guildchat-shortener"
+    "website": "https://modrinth.com/mod/guildzip"
   }
 }

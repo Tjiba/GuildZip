@@ -11,7 +11,7 @@ public class BridgeConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance()
-            .getConfigDir().resolve("guildchat-formatter.json");
+            .getConfigDir().resolve("guildzip.json");
 
     private static BridgeConfig instance;
 
