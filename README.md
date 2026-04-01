@@ -44,7 +44,7 @@
 - Minecraft 1.21+
 - Fabric Loader 0.18.0+
 - Fabric API (required)
-- ModMenu (optional - better for graphical config)
+- ModMenu (optional - for graphical config)
 - Cloth Config (optional - for graphical config)
 
 **Setup**:
