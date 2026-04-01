@@ -51,15 +51,8 @@ public class VersionManager {
     private static ReleaseInfo latestReleaseInfo = null;
     
     /**
-     * Vérifie la version en ligne de manière asynchrone
-     */
-    public static void checkVersionUpdateAsync() {
-        checkVersionUpdateAsyncInternal();
-    }
-    
-    /**
      * Vérifie la version en ligne et retourne un CompletableFuture
-     * (utilisé pour la vérification manuelle)
+     * (utilisé pour la vérification asynchrone)
      */
     static CompletableFuture<Void> checkVersionUpdateAsyncInternal() {
         return CompletableFuture.runAsync(() -> {
@@ -73,15 +66,17 @@ public class VersionManager {
                     latestVersionOnline = releaseInfo.getVersion();
                     GuildChatMod.LOGGER.info("Latest version on GitHub: " + latestVersionOnline);
                     
-                    int comparison = compareVersions(CURRENT_VERSION, latestVersionOnline);
-                    if (comparison < 0) {
-                        // Current version is older, update available
-                        showUpdateMessage(latestVersionOnline);
-                    } else if (comparison > 0) {
-                        // Current version is newer (dev version)
-                        showDevVersionMessage(latestVersionOnline);
-                    } else {
-                        GuildChatMod.LOGGER.info("Version is up to date!");
+                    if (CURRENT_VERSION != null) {
+                        int comparison = compareVersions(CURRENT_VERSION, latestVersionOnline);
+                        if (comparison < 0) {
+                            // Current version is older, update available
+                            showUpdateMessage(latestVersionOnline);
+                        } else if (comparison > 0) {
+                            // Current version is newer (dev version)
+                            showDevVersionMessage(latestVersionOnline);
+                        } else {
+                            GuildChatMod.LOGGER.info("Version is up to date!");
+                        }
                     }
                 } else {
                     GuildChatMod.LOGGER.warn("Failed to fetch latest version from GitHub (returned null)");
@@ -128,7 +123,7 @@ public class VersionManager {
                 
                 String tagName = json.get("tag_name").getAsString();
                 GuildChatMod.LOGGER.info("Found tag: " + tagName);
-                
+
                 // Nettoyer le tag (enlever le "v" s'il existe)
                 String version = tagName.startsWith("v") ? tagName.substring(1) : tagName;
                 ReleaseInfo releaseInfo = new ReleaseInfo(version, null, null);
@@ -226,3 +221,4 @@ public class VersionManager {
         }
     }
 }
+

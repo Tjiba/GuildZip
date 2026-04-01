@@ -31,10 +31,6 @@ public class UpdateDownloader {
         public String getMessage() {
             return message;
         }
-
-        public Path getTargetPath() {
-            return targetPath;
-        }
     }
 
     public static CompletableFuture<DownloadResult> downloadLatestReleaseAsync() {

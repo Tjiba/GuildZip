@@ -70,30 +70,6 @@ public class GuildChatMod implements ClientModInitializer {
         return code.substring(0, 1).toLowerCase();
     }
 
-    private static void showStatus(MinecraftClient client) {
-        BridgeConfig cfg = BridgeConfig.get();
-        String mc = cfg.botMCName != null ? cfg.botMCName : "auto";
-        String mode = cfg.formatAllGuild
-            ? Messages.get(Messages.BRIDGE_STATUS_MODE_ALL)
-            : Messages.get(Messages.BRIDGE_STATUS_MODE_BRIDGE);
-        String randomState = cfg.randomMode
-            ? Messages.get(Messages.BRIDGE_STATUS_RANDOM_ON)
-            : Messages.get(Messages.BRIDGE_STATUS_RANDOM_OFF);
-        String aliasColorCode = safeColorCode(cfg.botAliasColor);
-        String playerColorCode = safeColorCode(cfg.discordNameColor);
-        String guildPrefixColorCode = safeColorCode(cfg.guildPrefixColor);
-        String officerPrefixColorCode = safeColorCode(cfg.officerPrefixColor);
-
-        feedback(client,
-            Messages.format(Messages.BRIDGE_STATUS,
-                mc, cfg.botAlias,
-                "§" + aliasColorCode + colorNameFromCode(aliasColorCode),
-                "§" + playerColorCode + colorNameFromCode(playerColorCode),
-                "§" + guildPrefixColorCode + cfg.guildPrefix,
-                "§" + officerPrefixColorCode + cfg.officerPrefix,
-                mode,
-                randomState));
-    }
 
     private static String colorNameFromCode(String code) {
         String safe = safeColorCode(code);
