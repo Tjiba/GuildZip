@@ -140,13 +140,13 @@ public class GuildChatConfigScreen {
         
         colors.addEntry(ENTRY_BUILDER
                 .startEnumSelector(
-                        Text.literal("Discord Player Color"),
+                        Text.literal("Player Color"),
                         ChatColorOption.class,
                         currentPlayerColor
                 )
                 .setDefaultValue(ChatColorOption.DARK_CYAN)
                 .setSaveConsumer(value -> BridgeConfig.get().discordNameColor = value.getCode())
-                .setTooltip(Text.literal("Click to cycle through colors"))
+                .setTooltip(Text.literal("Color for player names in messages"))
                 .build());
 
         ChatColorOption currentGuildPrefixColor = ChatColorOption.fromCode(BridgeConfig.get().guildPrefixColor);
@@ -172,9 +172,10 @@ public class GuildChatConfigScreen {
                 )
                 .setDefaultValue(ChatColorOption.MAGENTA)
                 .setSaveConsumer(value -> BridgeConfig.get().officerPrefixColor = value.getCode())
-                .setTooltip(Text.literal("Click to cycle through colors"))
+                .setTooltip(Text.literal("Use random colors for each message (overrides the colors above)"))
                 .build());
 
+        // Version Colors Section
         ChatColorOption currentV1Color = ChatColorOption.fromCode(BridgeConfig.get().guildVersionV1Color);
         colors.addEntry(ENTRY_BUILDER
                 .startEnumSelector(
