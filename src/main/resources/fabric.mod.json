@@ -6,7 +6,7 @@
   "description": "Formate les messages bridge Discord dans la guild Hypixel. Commandes: /gz, /gz update",
   "authors": ["Tjiba"],
   "license": "MIT",
-  "icon": "icon.png",
+  "icon": "icon256.png",
   "environment": "client",
   "entrypoints": {
     "client": ["com.guildchat.formatter.GuildChatMod"],
