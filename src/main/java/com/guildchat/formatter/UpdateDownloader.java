@@ -55,6 +55,21 @@ public class UpdateDownloader {
                 Files.createDirectories(modsDir);
             }
 
+            // Clean up old GuildZip JAR files
+            try (var stream = Files.list(modsDir)) {
+                stream.filter(path -> {
+                    String fileName = path.getFileName().toString().toLowerCase();
+                    return fileName.startsWith("guildzip") && fileName.endsWith(".jar");
+                }).forEach(path -> {
+                    try {
+                        Files.delete(path);
+                        GuildChatMod.LOGGER.info("Deleted old mod JAR: " + path.getFileName());
+                    } catch (Exception e) {
+                        GuildChatMod.LOGGER.warn("Failed to delete old JAR: " + path.getFileName());
+                    }
+                });
+            }
+
             String cleanName = releaseInfo.getJarName().replace(" ", "-");
             Path finalPath = modsDir.resolve(cleanName);
             Path tmpPath = modsDir.resolve(cleanName + ".download");
@@ -64,13 +79,13 @@ public class UpdateDownloader {
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(15000);
             connection.setRequestProperty("User-Agent", "GuildZip-Mod-Updater");
-
+            
             // Ajouter le support des redirects
             connection.setInstanceFollowRedirects(true);
             HttpURLConnection.setFollowRedirects(true);
 
             int responseCode = connection.getResponseCode();
-
+            
             // Gérer les redirects manuellement si nécessaire
             if (responseCode == 301 || responseCode == 302) {
                 String newLocation = connection.getHeaderField("Location");
@@ -84,7 +99,7 @@ public class UpdateDownloader {
                     responseCode = connection.getResponseCode();
                 }
             }
-
+            
             if (responseCode < 200 || responseCode >= 300) {
                 connection.disconnect();
                 return new DownloadResult(false, "Download failed: HTTP " + responseCode, null);
