@@ -37,10 +37,9 @@ jobs:
           echo "JAR_NAME=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.tag_version.outputs.VERSION }}
+          tag: ${{ steps.tag_version.outputs.VERSION }}
           name: GuildZip ${{ steps.tag_version.outputs.VERSION }}
           body: |
             # GuildZip ${{ steps.tag_version.outputs.VERSION }}
@@ -48,5 +47,6 @@ jobs:
             Download the mod JAR below and place it in your mods folder.
           draft: false
           prerelease: false
-          files: ${{ steps.jar_file.outputs.JAR_PATH }}
+          artifacts: ${{ steps.jar_file.outputs.JAR_PATH }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
