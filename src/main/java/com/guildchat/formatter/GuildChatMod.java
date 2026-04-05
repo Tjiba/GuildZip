@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class GuildChatMod implements ClientModInitializer {
 
@@ -23,8 +26,9 @@ public class GuildChatMod implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info(Messages.get(Messages.MOD_LOADED));
         BridgeConfig.get(); // initialise la config
+        cleanOldJars();
 
-        // Initialiser le notificateur de mise à jour (vérifie en ligne sur GitHub)
+        // Initialiser le notificateur de mise à jour (vérifie en ligne sur Modrinth)
         UpdateNotifier.init();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
@@ -58,6 +62,27 @@ public class GuildChatMod implements ClientModInitializer {
                 feedback(client, "Failed to open config screen.");
             }
         });
+    }
+
+    private static void cleanOldJars() {
+        try {
+            Path modsDir = FabricLoader.getInstance().getGameDir().resolve("mods");
+            try (Stream<Path> entries = Files.list(modsDir)) {
+                entries.filter(p -> {
+                    String name = p.getFileName().toString().toLowerCase();
+                    return name.startsWith("guildzip") && name.endsWith(".jar.old");
+                }).forEach(old -> {
+                    try {
+                        Files.delete(old);
+                        LOGGER.info("Deleted old GuildZip JAR: " + old.getFileName());
+                    } catch (Exception e) {
+                        LOGGER.warn("Could not delete old GuildZip JAR: " + old.getFileName());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error during old JAR cleanup: " + e.getMessage());
+        }
     }
 
     private static void feedback(MinecraftClient mc, String msg) {

@@ -45,7 +45,7 @@ public class VersionManager {
             .map(container -> container.getMetadata().getVersion().getFriendlyString())
             .orElse("unknown");
     
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/Tjiba/GuildZip/releases/latest";
+    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version";
     
     private static String latestVersionOnline = null;
     private static ReleaseInfo latestReleaseInfo = null;
@@ -57,15 +57,15 @@ public class VersionManager {
     static CompletableFuture<Void> checkVersionUpdateAsyncInternal() {
         return CompletableFuture.runAsync(() -> {
             try {
-                GuildChatMod.LOGGER.info("Checking for updates from GitHub...");
+                GuildChatMod.LOGGER.info("Checking for updates from Modrinth...");
                 GuildChatMod.LOGGER.info("Current version: " + CURRENT_VERSION);
                 
-                ReleaseInfo releaseInfo = fetchLatestReleaseFromGitHub();
+                ReleaseInfo releaseInfo = fetchLatestReleaseFromModrinth();
                 if (releaseInfo != null && releaseInfo.getVersion() != null) {
                     latestReleaseInfo = releaseInfo;
                     latestVersionOnline = releaseInfo.getVersion();
-                    GuildChatMod.LOGGER.info("Latest version on GitHub: " + latestVersionOnline);
-                    
+                    GuildChatMod.LOGGER.info("Latest version on Modrinth: " + latestVersionOnline);
+
                     if (CURRENT_VERSION != null) {
                         int comparison = compareVersions(CURRENT_VERSION, latestVersionOnline);
                         if (comparison < 0) {
@@ -79,7 +79,7 @@ public class VersionManager {
                         }
                     }
                 } else {
-                    GuildChatMod.LOGGER.warn("Failed to fetch latest version from GitHub (returned null)");
+                    GuildChatMod.LOGGER.warn("Failed to fetch latest version from Modrinth (returned null)");
                 }
             } catch (Exception e) {
                 GuildChatMod.LOGGER.error("Error checking version", e);
@@ -88,21 +88,21 @@ public class VersionManager {
     }
     
     /**
-     * Récupère la dernière version depuis l'API GitHub
+     * Récupère la dernière version depuis l'API Modrinth
      */
-    private static ReleaseInfo fetchLatestReleaseFromGitHub() throws Exception {
-        GuildChatMod.LOGGER.info("Fetching from: " + GITHUB_API_URL);
-        
-        var url = new URI(GITHUB_API_URL).toURL();
+    private static ReleaseInfo fetchLatestReleaseFromModrinth() throws Exception {
+        GuildChatMod.LOGGER.info("Fetching from Modrinth: " + MODRINTH_API_URL);
+
+        var url = new URI(MODRINTH_API_URL).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(5000);
         connection.setRequestProperty("User-Agent", "GuildZip-Mod");
-        
+
         int responseCode = connection.getResponseCode();
-        GuildChatMod.LOGGER.info("GitHub API response code: " + responseCode);
-        
+        GuildChatMod.LOGGER.info("Modrinth API response code: " + responseCode);
+
         if (responseCode == 200) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 StringBuilder response = new StringBuilder();
@@ -110,55 +110,51 @@ public class VersionManager {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-                
+
                 String jsonResponse = response.toString();
-                GuildChatMod.LOGGER.info("Response length: " + jsonResponse.length() + " chars");
-                
-                JsonObject json = JsonParser.parseString(jsonResponse).getAsJsonObject();
-                
-                if (!json.has("tag_name")) {
-                    GuildChatMod.LOGGER.error("No 'tag_name' field in GitHub response");
-                    return null;
-                }
-                
-                String tagName = json.get("tag_name").getAsString();
-                GuildChatMod.LOGGER.info("Found tag: " + tagName);
+                JsonArray versions = JsonParser.parseString(jsonResponse).getAsJsonArray();
 
-                // Nettoyer le tag (enlever le "v" s'il existe)
-                String version = tagName.startsWith("v") ? tagName.substring(1) : tagName;
-                ReleaseInfo releaseInfo = new ReleaseInfo(version, null, null);
+                // Prendre la première version (la plus récente)
+                if (versions.size() > 0) {
+                    JsonObject latestVersion = versions.get(0).getAsJsonObject();
 
-                if (json.has("assets") && json.get("assets").isJsonArray()) {
-                    JsonArray assets = json.getAsJsonArray("assets");
-                    for (JsonElement element : assets) {
-                        if (!element.isJsonObject()) continue;
-                        JsonObject asset = element.getAsJsonObject();
-                        if (!asset.has("name") || !asset.has("browser_download_url")) continue;
+                    if (!latestVersion.has("version_number")) {
+                        GuildChatMod.LOGGER.error("No 'version_number' field in Modrinth response");
+                        return null;
+                    }
 
-                        String name = asset.get("name").getAsString();
-                        String downloadUrl = asset.get("browser_download_url").getAsString();
-                        String lowered = name.toLowerCase();
+                    String version = latestVersion.get("version_number").getAsString();
+                    GuildChatMod.LOGGER.info("Found Modrinth version: " + version);
 
-                        if (lowered.endsWith(".jar")
-                                && !lowered.contains("sources")
-                                && !lowered.contains("javadoc")) {
-                            releaseInfo = new ReleaseInfo(version, name, downloadUrl);
-                            GuildChatMod.LOGGER.info("Selected release asset: " + name);
-                            break;
+                    // Récupérer le JAR depuis les fichiers
+                    if (latestVersion.has("files") && latestVersion.get("files").isJsonArray()) {
+                        JsonArray files = latestVersion.getAsJsonArray("files");
+                        for (JsonElement element : files) {
+                            if (!element.isJsonObject()) continue;
+                            JsonObject file = element.getAsJsonObject();
+                            if (!file.has("filename") || !file.has("url")) continue;
+
+                            String filename = file.get("filename").getAsString();
+                            String downloadUrl = file.get("url").getAsString();
+
+                            if (filename.endsWith(".jar")) {
+                                GuildChatMod.LOGGER.info("Selected Modrinth asset: " + filename);
+                                return new ReleaseInfo(version, filename, downloadUrl);
+                            }
                         }
                     }
-                }
 
-                return releaseInfo;
+                    return new ReleaseInfo(version, null, null);
+                }
             }
         } else {
-            GuildChatMod.LOGGER.warn("GitHub API returned non-200 code: " + responseCode);
+            GuildChatMod.LOGGER.warn("Modrinth API returned non-200 code: " + responseCode);
         }
-        
+
         connection.disconnect();
         return null;
     }
-    
+
     /**
      * Affiche le message de mise à jour
      */
