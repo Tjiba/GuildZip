@@ -1,8 +1,8 @@
 package com.guildchat.formatter.mixin;
 
 import com.guildchat.formatter.BridgeConfig;
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  *
  * Les messages guild normaux (sans bridge) ne sont PAS modifiés.
  */
-@Mixin(ChatHud.class)
+@Mixin(ChatComponent.class)
 public class ChatHudMixin {
 
     // Supprime tous les codes couleur Minecraft (§0-§9, §a-§f, §k-§r)
@@ -67,18 +67,18 @@ public class ChatHudMixin {
     private static final Pattern CHAT_TIMESTAMP_PREFIX = Pattern.compile("^\\[[0-2]\\d:[0-5]\\d:[0-5]\\d]\\s+");
 
     @ModifyVariable(
-        method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V",
+        method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V",
         at = @At("HEAD"),
         argsOnly = true
     )
-    private Text onAddMessage(Text original) {
+    private Component onAddMessage(Component original) {
         if (original == null) return null;
         
         // Remove Discord warning suffix from the original message text
         String originalString = original.getString();
         if (originalString.contains("Please be mindful of Discord links")) {
             originalString = DISCORD_WARNING_SUFFIX.matcher(originalString).replaceAll("");
-            original = Text.literal(originalString);
+            original = Component.literal(originalString);
         }
 
         // 1. Texte brut sans codes couleur
@@ -134,7 +134,7 @@ public class ChatHudMixin {
             String formatted = "§" + prefixColorCode + prefix + "§8 > "
                 + "§" + playerColorCode + botMC
                 + "§8: §f" + message;
-            return Text.literal(formatted);
+            return Component.literal(formatted);
         }
         String cleaned = stripLeadingNonVersionTag(payload);
 
@@ -187,7 +187,7 @@ public class ChatHudMixin {
             + "§" + playerColorCode + discord
             + "§8 : §f" + message;
 
-        return Text.literal(formatted);
+        return Component.literal(formatted);
     }
 
     @Unique

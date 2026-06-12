@@ -2,6 +2,7 @@ package com.guildchat.formatter;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -12,51 +13,57 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.CompletableFuture;
 
 public class VersionManager {
-    
+
     // Version dynamique lue depuis fabric.mod.json au lieu d'être codée en dur
     public static final String CURRENT_VERSION = FabricLoader.getInstance()
-            .getModContainer("guildchat-shortener")
+            .getModContainer("guildzip")
             .map(container -> container.getMetadata().getVersion().getFriendlyString())
             .orElse("unknown");
     
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/Tjiba/GuildChatShortener/releases/latest";
+    // Version de Minecraft en cours d'exécution (ex: "26.1.2")
+    private static final String MC_VERSION = FabricLoader.getInstance()
+            .getModContainer("minecraft")
+            .map(container -> container.getMetadata().getVersion().getFriendlyString())
+            .orElse(null);
+
+    // Ne liste que les versions du mod publiées pour la version de Minecraft du joueur,
+    // sinon l'auto-updater installerait un jar incompatible (ex: jar 26.1 sur un client 1.21)
+    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version"
+            + (MC_VERSION != null
+                ? "?loaders=%5B%22fabric%22%5D&game_versions=%5B%22" + MC_VERSION + "%22%5D"
+                : "");
     
     private static String latestVersionOnline = null;
     
     /**
-     * Vérifie la version en ligne de manière asynchrone
-     */
-    public static void checkVersionUpdateAsync() {
-        checkVersionUpdateAsyncInternal();
-    }
-    
-    /**
      * Vérifie la version en ligne et retourne un CompletableFuture
-     * (utilisé pour la vérification manuelle)
+     * (utilisé pour la vérification asynchrone)
      */
     static CompletableFuture<Void> checkVersionUpdateAsyncInternal() {
         return CompletableFuture.runAsync(() -> {
             try {
-                GuildChatMod.LOGGER.info("Checking for updates from GitHub...");
+                GuildChatMod.LOGGER.info("Checking for updates from Modrinth...");
                 GuildChatMod.LOGGER.info("Current version: " + CURRENT_VERSION);
                 
-                String latestVersion = fetchLatestVersionFromGitHub();
-                if (latestVersion != null) {
-                    latestVersionOnline = latestVersion;
-                    GuildChatMod.LOGGER.info("Latest version on GitHub: " + latestVersion);
-                    
-                    int comparison = compareVersions(CURRENT_VERSION, latestVersion);
-                    if (comparison < 0) {
-                        // Current version is older, update available
-                        showUpdateMessage(latestVersion);
-                    } else if (comparison > 0) {
-                        // Current version is newer (dev version)
-                        showDevVersionMessage(latestVersion);
-                    } else {
-                        GuildChatMod.LOGGER.info("Version is up to date!");
+                String version = fetchLatestVersionFromModrinth();
+                if (version != null) {
+                    latestVersionOnline = version;
+                    GuildChatMod.LOGGER.info("Latest version on Modrinth: " + latestVersionOnline);
+
+                    if (CURRENT_VERSION != null) {
+                        int comparison = compareVersions(CURRENT_VERSION, latestVersionOnline);
+                        if (comparison < 0) {
+                            // Current version is older, update available
+                            showUpdateMessage(latestVersionOnline);
+                        } else if (comparison > 0) {
+                            // Current version is newer (dev version)
+                            showDevVersionMessage(latestVersionOnline);
+                        } else {
+                            GuildChatMod.LOGGER.info("Version is up to date!");
+                        }
                     }
                 } else {
-                    GuildChatMod.LOGGER.warn("Failed to fetch latest version from GitHub (returned null)");
+                    GuildChatMod.LOGGER.warn("Failed to fetch latest version from Modrinth (returned null)");
                 }
             } catch (Exception e) {
                 GuildChatMod.LOGGER.error("Error checking version", e);
@@ -65,21 +72,21 @@ public class VersionManager {
     }
     
     /**
-     * Récupère la dernière version depuis l'API GitHub
+     * Récupère la dernière version depuis l'API Modrinth
      */
-    private static String fetchLatestVersionFromGitHub() throws Exception {
-        GuildChatMod.LOGGER.info("Fetching from: " + GITHUB_API_URL);
-        
-        var url = new URI(GITHUB_API_URL).toURL();
+    private static String fetchLatestVersionFromModrinth() throws Exception {
+        GuildChatMod.LOGGER.info("Fetching from Modrinth: " + MODRINTH_API_URL);
+
+        var url = new URI(MODRINTH_API_URL).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(5000);
-        connection.setRequestProperty("User-Agent", "GuildChatShortener-Mod");
-        
+        connection.setRequestProperty("User-Agent", "GuildZip-Mod");
+
         int responseCode = connection.getResponseCode();
-        GuildChatMod.LOGGER.info("GitHub API response code: " + responseCode);
-        
+        GuildChatMod.LOGGER.info("Modrinth API response code: " + responseCode);
+
         if (responseCode == 200) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 StringBuilder response = new StringBuilder();
@@ -87,37 +94,38 @@ public class VersionManager {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-                
+
                 String jsonResponse = response.toString();
-                GuildChatMod.LOGGER.info("Response length: " + jsonResponse.length() + " chars");
-                
-                JsonObject json = JsonParser.parseString(jsonResponse).getAsJsonObject();
-                
-                if (!json.has("tag_name")) {
-                    GuildChatMod.LOGGER.error("No 'tag_name' field in GitHub response");
-                    return null;
+                JsonArray versions = JsonParser.parseString(jsonResponse).getAsJsonArray();
+
+                // Prendre la première version (la plus récente)
+                if (versions.size() > 0) {
+                    JsonObject latestVersion = versions.get(0).getAsJsonObject();
+
+                    if (!latestVersion.has("version_number")) {
+                        GuildChatMod.LOGGER.error("No 'version_number' field in Modrinth response");
+                        return null;
+                    }
+
+                    String version = latestVersion.get("version_number").getAsString();
+                    GuildChatMod.LOGGER.info("Found Modrinth version: " + version);
+                    return version;
                 }
-                
-                String tagName = json.get("tag_name").getAsString();
-                GuildChatMod.LOGGER.info("Found tag: " + tagName);
-                
-                // Nettoyer le tag (enlever le "v" s'il existe)
-                return tagName.startsWith("v") ? tagName.substring(1) : tagName;
             }
         } else {
-            GuildChatMod.LOGGER.warn("GitHub API returned non-200 code: " + responseCode);
+            GuildChatMod.LOGGER.warn("Modrinth API returned non-200 code: " + responseCode);
         }
-        
+
         connection.disconnect();
         return null;
     }
-    
+
     /**
      * Affiche le message de mise à jour
      */
     private static void showUpdateMessage(String newVersion) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            GuildChatMod.LOGGER.info("Guild Chat Shortener update available! New version: " + newVersion + " (current: " + CURRENT_VERSION + ")");
+            GuildChatMod.LOGGER.info("GuildZip update available! New version: " + newVersion + " (current: " + CURRENT_VERSION + ")");
         }
     }
     
@@ -126,7 +134,7 @@ public class VersionManager {
      */
     private static void showDevVersionMessage(String releaseVersion) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            GuildChatMod.LOGGER.info("Guild Chat Shortener: Dev version " + CURRENT_VERSION + " > " + releaseVersion + " (release)");
+            GuildChatMod.LOGGER.info("GuildZip: Dev version " + CURRENT_VERSION + " > " + releaseVersion + " (release)");
         }
     }
     
@@ -136,7 +144,7 @@ public class VersionManager {
     public static String getLatestVersionOnline() {
         return latestVersionOnline;
     }
-    
+
     /**
      * Réinitialise le cache de version (utile pour forcer une nouvelle vérification)
      */
@@ -169,3 +177,4 @@ public class VersionManager {
         }
     }
 }
+

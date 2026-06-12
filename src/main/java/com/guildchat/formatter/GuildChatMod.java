@@ -1,21 +1,24 @@
 package com.guildchat.formatter;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class GuildChatMod implements ClientModInitializer {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("guildchat-formatter");
+    public static final Logger LOGGER = LoggerFactory.getLogger("guildzip");
 
     private static String pendingConfigModId = null;
 
@@ -23,64 +26,24 @@ public class GuildChatMod implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info(Messages.get(Messages.MOD_LOADED));
         BridgeConfig.get(); // initialise la config
+        cleanOldJars();
 
-        // Initialiser le notificateur de mise à jour (vérifie en ligne sur GitHub)
+        // Initialiser le notificateur de mise à jour (vérifie en ligne sur Modrinth)
         UpdateNotifier.init();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
             dispatcher.register(
-                ClientCommandManager.literal("bridge")
-                    .then(ClientCommandManager.literal("status")
+                ClientCommands.literal("gz")
+                    .then(ClientCommands.literal("update")
                         .executes(ctx -> {
-                            BridgeConfig cfg = BridgeConfig.get();
-                            String mc = cfg.botMCName != null ? cfg.botMCName : "auto";
-                            String mode = cfg.formatAllGuild
-                                ? Messages.get(Messages.BRIDGE_STATUS_MODE_ALL)
-                                : Messages.get(Messages.BRIDGE_STATUS_MODE_BRIDGE);
-                            String randomState = cfg.randomMode
-                                ? Messages.get(Messages.BRIDGE_STATUS_RANDOM_ON)
-                                : Messages.get(Messages.BRIDGE_STATUS_RANDOM_OFF);
-                            String aliasColorCode = safeColorCode(cfg.botAliasColor);
-                            String playerColorCode = safeColorCode(cfg.discordNameColor);
-                            String guildPrefixColorCode = safeColorCode(cfg.guildPrefixColor);
-                            String officerPrefixColorCode = safeColorCode(cfg.officerPrefixColor);
-                            feedback(ctx.getSource().getClient(),
-                                Messages.format(Messages.BRIDGE_STATUS,
-                                    mc, cfg.botAlias,
-                                    "§" + aliasColorCode + colorNameFromCode(aliasColorCode),
-                                    "§" + playerColorCode + colorNameFromCode(playerColorCode),
-                                    "§" + guildPrefixColorCode + cfg.guildPrefix,
-                                    "§" + officerPrefixColorCode + cfg.officerPrefix,
-                                    mode,
-                                    randomState));
+                            UpdateNotifier.checkUpdateManually(ctx.getSource().getClient());
                             return 1;
                         })
                     )
-            )
-        );
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(
-                ClientCommandManager.literal("gcs")
                     .executes(ctx -> {
-                        MinecraftClient client = ctx.getSource().getClient();
+                        Minecraft client = ctx.getSource().getClient();
                         if (isModMenuLoaded()) {
-                            pendingConfigModId = "guildchat-shortener";
-                            return 1;
-                        }
-                        feedback(client, "Mod Menu is not installed.");
-                        return 0;
-                    })
-            )
-        );
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(
-                ClientCommandManager.literal("guildchatshortener")
-                    .executes(ctx -> {
-                        MinecraftClient client = ctx.getSource().getClient();
-                        if (isModMenuLoaded()) {
-                            pendingConfigModId = "guildchat-shortener";
+                            pendingConfigModId = "guildzip";
                             return 1;
                         }
                         feedback(client, "Mod Menu is not installed.");
@@ -91,7 +54,7 @@ public class GuildChatMod implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (pendingConfigModId == null) return;
-            Screen configScreen = getConfigScreen(pendingConfigModId, client.currentScreen);
+            Screen configScreen = getConfigScreen(pendingConfigModId, client.screen);
             pendingConfigModId = null;
             if (configScreen != null) {
                 client.setScreen(configScreen);
@@ -101,37 +64,37 @@ public class GuildChatMod implements ClientModInitializer {
         });
     }
 
-    private static void feedback(MinecraftClient mc, String msg) {
+    private static void cleanOldJars() {
+        String currentVersion = VersionManager.CURRENT_VERSION;
+        try {
+            Path modsDir = FabricLoader.getInstance().getGameDir().resolve("mods");
+            try (Stream<Path> entries = Files.list(modsDir)) {
+                entries.filter(p -> {
+                    String name = p.getFileName().toString().toLowerCase();
+                    if (!name.startsWith("guildzip")) return false;
+                    if (name.endsWith(".jar.old")) return true;
+                    // Supprime tout JAR GuildZip qui n'est pas la version courante
+                    if (name.endsWith(".jar") && currentVersion != null) {
+                        return !name.contains(currentVersion.toLowerCase());
+                    }
+                    return false;
+                }).forEach(old -> {
+                    try {
+                        Files.delete(old);
+                        LOGGER.info("Deleted old GuildZip JAR: " + old.getFileName());
+                    } catch (Exception e) {
+                        LOGGER.warn("Could not delete old GuildZip JAR: " + old.getFileName());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error during old JAR cleanup: " + e.getMessage());
+        }
+    }
+
+    private static void feedback(Minecraft mc, String msg) {
         if (mc != null && mc.player != null)
-            mc.player.sendMessage(Text.literal(msg), false);
-    }
-
-    private static String safeColorCode(String code) {
-        if (code == null || code.isEmpty()) return "b";
-        return code.substring(0, 1).toLowerCase();
-    }
-
-    private static String colorNameFromCode(String code) {
-        String safe = safeColorCode(code);
-        return switch (safe) {
-            case "0" -> Messages.get(Messages.COLOR_BLACK);
-            case "1" -> Messages.get(Messages.COLOR_DARK_BLUE);
-            case "2" -> Messages.get(Messages.COLOR_DARK_GREEN);
-            case "3" -> Messages.get(Messages.COLOR_DARK_AQUA);
-            case "4" -> Messages.get(Messages.COLOR_DARK_RED);
-            case "5" -> Messages.get(Messages.COLOR_DARK_PURPLE);
-            case "6" -> Messages.get(Messages.COLOR_GOLD);
-            case "7" -> Messages.get(Messages.COLOR_GRAY);
-            case "8" -> Messages.get(Messages.COLOR_DARK_GRAY);
-            case "9" -> Messages.get(Messages.COLOR_BLUE);
-            case "a" -> Messages.get(Messages.COLOR_GREEN);
-            case "b" -> Messages.get(Messages.COLOR_AQUA);
-            case "c" -> Messages.get(Messages.COLOR_RED);
-            case "d" -> Messages.get(Messages.COLOR_LIGHT_PURPLE);
-            case "e" -> Messages.get(Messages.COLOR_YELLOW);
-            case "f" -> Messages.get(Messages.COLOR_WHITE);
-            default -> Messages.get(Messages.COLOR_AQUA);
-        };
+            mc.player.sendSystemMessage(Component.literal(msg));
     }
 
     private static boolean isModMenuLoaded() {

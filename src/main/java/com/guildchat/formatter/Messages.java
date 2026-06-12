@@ -17,12 +17,11 @@ public class Messages {
     
     // Update messages
     public static final String UPDATE_AVAILABLE = "update.available";
-    public static final String UPDATE_MODRINTH = "update.modrinth";
     public static final String UPDATE_CHECKING = "update.checking";
     public static final String UPDATE_UP_TO_DATE = "update.up_to_date";
     public static final String UPDATE_CHECK_FAILED = "update.check_failed";
     public static final String UPDATE_DEV_VERSION = "update.dev_version";
-    
+
     // Color names
     public static final String COLOR_BLACK = "color.name.black";
     public static final String COLOR_DARK_BLUE = "color.name.dark_blue";
@@ -43,8 +42,8 @@ public class Messages {
     
     static {
         // Mod loaded
-        add(MOD_LOADED, Language.ENGLISH, "Guild Chat Formatter loaded!");
-        add(MOD_LOADED, Language.FRENCH, "Guild Chat Formatter chargé !");
+        add(MOD_LOADED, Language.ENGLISH, "GuildZip loaded!");
+        add(MOD_LOADED, Language.FRENCH, "GuildZip chargé !");
         
         // Bridge commands
         add(BRIDGE_STATUS, Language.ENGLISH, "§7Bot: §e%s §7| Alias: §b%s §7| Colors: §b%s §7/ §3%s §7| Prefixes: §b%s §7/ §3%s §7| Mode: §e%s §7| Random: %s");
@@ -112,12 +111,9 @@ public class Messages {
         add(COLOR_WHITE, Language.FRENCH, "blanc");
         
         // Update messages
-        add(UPDATE_AVAILABLE, Language.ENGLISH, "§c§lGuild Chat Shortener update available! §7v%s is now available (current: v%s). §6Download it on §lModrinth§6.");
-        add(UPDATE_AVAILABLE, Language.FRENCH, "§c§lMise à jour disponible pour Guild Chat Shortener ! §7v%s est maintenant disponible (actuelle: v%s). §6Télécharger sur §lModrinth§6.");
-        
-        add(UPDATE_MODRINTH, Language.ENGLISH, "§6Link: §bhttps://modrinth.com/mod/guildchat-shortener");
-        add(UPDATE_MODRINTH, Language.FRENCH, "§6Lien: §bhttps://modrinth.com/mod/guildchat-shortener");
-        
+        add(UPDATE_AVAILABLE, Language.ENGLISH, "§eNew update available! §7v%s (current: v%s) §6— click to open Modrinth.");
+        add(UPDATE_AVAILABLE, Language.FRENCH, "§eNouvelle mise à jour disponible ! §7v%s (actuelle: v%s) §6— clique pour ouvrir Modrinth.");
+
         add(UPDATE_CHECKING, Language.ENGLISH, "§eChecking for updates...");
         add(UPDATE_CHECKING, Language.FRENCH, "§eVérification des mises à jour...");
         

@@ -1,7 +1,23 @@
 # Changelog
 
+## 1.5.0 - 2026-06-12
+- ⬆️ **Ported to Minecraft 26.1.x** (26.1 is unobfuscated: migrated from Yarn to official Mojang names)
+- ☕ Now requires Java 25 (Minecraft 26.1 requirement)
+- 🔧 Updated toolchain: Gradle 9.5.1, Loom 1.17.11 (`net.fabricmc.fabric-loom`), Fabric Loader 0.19.3, Fabric API 0.151.0
+- 🔧 Updated dependencies: Mod Menu 18.0.0-beta.1, Cloth Config 26.1.154
+- 🛠️ Chat mixin retargeted to the new `ChatComponent#addMessage` (still covers player, system and server messages)
+- 🗑️ Removed duplicate message compaction `(x2)` — Hypixel already blocks sending the same message twice
+- 🔔 **Removed the auto-updater** (no more automatic jar downloads) — replaced by a simple clickable chat notification ~5 s after joining Hypixel; `/gz dismiss` and `/gz noupdate` removed, toggle available in config (Advanced → Update Notifications)
+- 🛡️ Update check now only looks at mod versions published for the running Minecraft version
+
+## 1.3.1 - 2026-03-31
+- 🤖 Added auto-updater: checks latest GitHub release and can auto-download the JAR into `mods/`
+- ⚙️ Added `Enable Auto-Updater` toggle in Mod Menu (Advanced)
+- 💬 Added `/gcs update` and `/guildchatshortener update` commands for manual trigger
+- 🧹 Reworked update flow to async callbacks (removed sleep-based notifier)
+
 ## 1.3.0 - 2026-03-20
-- ✨ V1/V2/V3 labels display correctly even with a custom bridge alias
+- ✨ V1/V2/V3 labels display correctly even with a custom bridge alias 
 - ⚙️ Config access via Mod Menu (Cloth Config required)
 - ✅ New shortcuts: `/gcs` and `/guildchatshortener` to open config
 - 🧹 Command list trimmed to `/bridge status` plus config shortcuts
