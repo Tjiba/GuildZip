@@ -45,7 +45,18 @@ public class VersionManager {
             .map(container -> container.getMetadata().getVersion().getFriendlyString())
             .orElse("unknown");
     
-    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version";
+    // Version de Minecraft en cours d'exécution (ex: "1.21.10")
+    private static final String MC_VERSION = FabricLoader.getInstance()
+            .getModContainer("minecraft")
+            .map(container -> container.getMetadata().getVersion().getFriendlyString())
+            .orElse(null);
+
+    // Ne liste que les versions du mod publiées pour la version de Minecraft du joueur,
+    // sinon l'auto-updater installerait un jar incompatible (ex: jar 26.1 sur un client 1.21)
+    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version"
+            + (MC_VERSION != null
+                ? "?loaders=%5B%22fabric%22%5D&game_versions=%5B%22" + MC_VERSION + "%22%5D"
+                : "");
     
     private static String latestVersionOnline = null;
     private static ReleaseInfo latestReleaseInfo = null;

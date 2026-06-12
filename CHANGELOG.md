@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.8 - 2026-06-12
+- Auto-updater now only sees mod versions published for the player's Minecraft version (prevents auto-installing the 26.1 jar on 1.21.x clients)
+- Final release for Minecraft 1.21.x
+
 ## 1.3.1 - 2026-03-31
 - 🤖 Added auto-updater: checks latest GitHub release and can auto-download the JAR into `mods/`
 - ⚙️ Added `Enable Auto-Updater` toggle in Mod Menu (Advanced)
