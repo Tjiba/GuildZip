@@ -1,13 +1,13 @@
 package com.guildchat.formatter;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,28 +33,15 @@ public class GuildChatMod implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
             dispatcher.register(
-                ClientCommandManager.literal("gz")
-                    .then(ClientCommandManager.literal("update")
+                ClientCommands.literal("gz")
+                    .then(ClientCommands.literal("update")
                         .executes(ctx -> {
                             UpdateNotifier.checkUpdateManually(ctx.getSource().getClient());
                             return 1;
                         })
                     )
-                    .then(ClientCommandManager.literal("dismiss")
-                        .executes(ctx -> {
-                            UpdateNotifier.dismiss();
-                            return 1;
-                        })
-                    )
-                    .then(ClientCommandManager.literal("noupdate")
-                        .executes(ctx -> {
-                            UpdateNotifier.disableNotification();
-                            feedback(ctx.getSource().getClient(), "§7[GZ] Update notifications disabled. Re-enable in config.");
-                            return 1;
-                        })
-                    )
                     .executes(ctx -> {
-                        MinecraftClient client = ctx.getSource().getClient();
+                        Minecraft client = ctx.getSource().getClient();
                         if (isModMenuLoaded()) {
                             pendingConfigModId = "guildzip";
                             return 1;
@@ -67,7 +54,7 @@ public class GuildChatMod implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (pendingConfigModId == null) return;
-            Screen configScreen = getConfigScreen(pendingConfigModId, client.currentScreen);
+            Screen configScreen = getConfigScreen(pendingConfigModId, client.screen);
             pendingConfigModId = null;
             if (configScreen != null) {
                 client.setScreen(configScreen);
@@ -105,9 +92,9 @@ public class GuildChatMod implements ClientModInitializer {
         }
     }
 
-    private static void feedback(MinecraftClient mc, String msg) {
+    private static void feedback(Minecraft mc, String msg) {
         if (mc != null && mc.player != null)
-            mc.player.sendMessage(Text.literal(msg), false);
+            mc.player.sendSystemMessage(Component.literal(msg));
     }
 
     private static boolean isModMenuLoaded() {

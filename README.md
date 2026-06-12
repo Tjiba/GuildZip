@@ -4,8 +4,8 @@
 
 **Your guild chat, finally readable.**
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21-brightgreen)](https://www.minecraft.net/)
-[![Fabric](https://img.shields.io/badge/Fabric-0.18.4-orange)](https://fabricmc.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-26.1-brightgreen)](https://www.minecraft.net/)
+[![Fabric](https://img.shields.io/badge/Fabric-0.19.3-orange)](https://fabricmc.net/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Build](https://github.com/Tjiba/GuildZip/actions/workflows/build.yml/badge.svg)](https://github.com/Tjiba/GuildZip/actions/workflows/build.yml)
 ![France](https://img.shields.io/badge/Made%20in-France-blue&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAKICAKICAKPC9zdmc+)
@@ -35,16 +35,16 @@ GuildZip reformats Hypixel guild chat messages — bridge, normal, and officer �
 - 🏷️ **Guild version labels** — V1 / V2 / V3 each with its own color
 - 🎨 **Custom alias & colors** — rename the bot, style every element independently
 - 🌐 **Global mode** — format all guild messages, not just bridge
-- 🔁 **Duplicate compaction** — repeated messages grouped as `(x2)`, `(x3)`...
-- 🔄 **Auto-updater** — notifies and downloads new versions automatically
+- 🔔 **Update notifier** — a chat message on Hypixel when a new version is available
 - 🌍 **EN / FR** — fully bilingual
 
 ---
 
 ## 📦 Requirements
 
-- Minecraft 1.21+ · Fabric Loader 0.18+ · Fabric API
+- Minecraft 26.1+ · Fabric Loader 0.18+ · Fabric API · Java 25+
 - ModMenu + Cloth Config *(optional — for the graphical config screen)*
+- Still on Minecraft 1.21.x? Use **[GuildZip 1.4.8](https://modrinth.com/mod/guildzip/versions)**, the final 1.21.x release
 
 ---
 

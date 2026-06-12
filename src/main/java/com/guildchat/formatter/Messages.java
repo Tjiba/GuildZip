@@ -17,17 +17,10 @@ public class Messages {
     
     // Update messages
     public static final String UPDATE_AVAILABLE = "update.available";
-    public static final String UPDATE_MODRINTH = "update.modrinth";
     public static final String UPDATE_CHECKING = "update.checking";
     public static final String UPDATE_UP_TO_DATE = "update.up_to_date";
     public static final String UPDATE_CHECK_FAILED = "update.check_failed";
     public static final String UPDATE_DEV_VERSION = "update.dev_version";
-    public static final String UPDATE_AUTO_START = "update.auto.start";
-    public static final String UPDATE_AUTO_SUCCESS = "update.auto.success";
-    public static final String UPDATE_AUTO_FAILED = "update.auto.failed";
-    public static final String UPDATE_RESTART_REQUIRED = "update.restart.required";
-    public static final String UPDATE_RESTART_ON_HYPIXEL_JOIN = "update.restart.on_hypixel_join";
-    public static final String UPDATE_AUTO_NOT_AVAILABLE = "update.auto.not_available";
 
     // Color names
     public static final String COLOR_BLACK = "color.name.black";
@@ -118,12 +111,9 @@ public class Messages {
         add(COLOR_WHITE, Language.FRENCH, "blanc");
         
         // Update messages
-        add(UPDATE_AVAILABLE, Language.ENGLISH, "§c§lGuildZip update available! §7v%s is now available (current: v%s). §6Download it on §lModrinth§6.");
-        add(UPDATE_AVAILABLE, Language.FRENCH, "§c§lMise à jour disponible pour GuildZip ! §7v%s est maintenant disponible (actuelle: v%s). §6Télécharger sur §lModrinth§6.");
-        
-        add(UPDATE_MODRINTH, Language.ENGLISH, "§6Link: §bhttps://modrinth.com/mod/guildzip");
-        add(UPDATE_MODRINTH, Language.FRENCH, "§6Lien: §bhttps://modrinth.com/mod/guildzip");
-        
+        add(UPDATE_AVAILABLE, Language.ENGLISH, "§eNew update available! §7v%s (current: v%s) §6— click to open Modrinth.");
+        add(UPDATE_AVAILABLE, Language.FRENCH, "§eNouvelle mise à jour disponible ! §7v%s (actuelle: v%s) §6— clique pour ouvrir Modrinth.");
+
         add(UPDATE_CHECKING, Language.ENGLISH, "§eChecking for updates...");
         add(UPDATE_CHECKING, Language.FRENCH, "§eVérification des mises à jour...");
         
@@ -135,24 +125,6 @@ public class Messages {
         
         add(UPDATE_DEV_VERSION, Language.ENGLISH, "§aYou are using a development version! §7(current: v%s, latest stable: v%s)");
         add(UPDATE_DEV_VERSION, Language.FRENCH, "§aVous utilisez une version de développement ! §7(actuelle: v%s, dernière stable: v%s)");
-
-        add(UPDATE_AUTO_START, Language.ENGLISH, "§eAuto-updater: downloading v%s...");
-        add(UPDATE_AUTO_START, Language.FRENCH, "§eAuto-updater : téléchargement de la v%s...");
-
-        add(UPDATE_AUTO_SUCCESS, Language.ENGLISH, "§aUpdate downloaded: %s");
-        add(UPDATE_AUTO_SUCCESS, Language.FRENCH, "§aMise à jour téléchargée : %s");
-
-        add(UPDATE_AUTO_FAILED, Language.ENGLISH, "§cAuto-updater failed: %s");
-        add(UPDATE_AUTO_FAILED, Language.FRENCH, "§cAuto-updater échoué : %s");
-
-        add(UPDATE_RESTART_REQUIRED, Language.ENGLISH, "§6Restart Minecraft to load the new version.");
-        add(UPDATE_RESTART_REQUIRED, Language.FRENCH, "§6Redémarrez Minecraft pour charger la nouvelle version.");
-
-        add(UPDATE_RESTART_ON_HYPIXEL_JOIN, Language.ENGLISH, "§6You joined Hypixel. The downloaded update will be active after restarting Minecraft.");
-        add(UPDATE_RESTART_ON_HYPIXEL_JOIN, Language.FRENCH, "§6Tu as rejoint Hypixel. La mise à jour téléchargée sera active après avoir redémarré Minecraft.");
-
-        add(UPDATE_AUTO_NOT_AVAILABLE, Language.ENGLISH, "§cAuto-updater unavailable: no downloadable JAR found on latest release.");
-        add(UPDATE_AUTO_NOT_AVAILABLE, Language.FRENCH, "§cAuto-updater indisponible : aucun JAR téléchargeable trouvé sur la dernière release.");
     }
     
     private static void add(String key, Language language, String message) {

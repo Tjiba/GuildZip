@@ -3,7 +3,6 @@ package com.guildchat.formatter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -15,40 +14,26 @@ import java.util.concurrent.CompletableFuture;
 
 public class VersionManager {
 
-    public static class ReleaseInfo {
-        private final String version;
-        private final String jarName;
-        private final String jarDownloadUrl;
-
-        public ReleaseInfo(String version, String jarName, String jarDownloadUrl) {
-            this.version = version;
-            this.jarName = jarName;
-            this.jarDownloadUrl = jarDownloadUrl;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public String getJarName() {
-            return jarName;
-        }
-
-        public String getJarDownloadUrl() {
-            return jarDownloadUrl;
-        }
-    }
-    
     // Version dynamique lue depuis fabric.mod.json au lieu d'être codée en dur
     public static final String CURRENT_VERSION = FabricLoader.getInstance()
             .getModContainer("guildzip")
             .map(container -> container.getMetadata().getVersion().getFriendlyString())
             .orElse("unknown");
     
-    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version";
+    // Version de Minecraft en cours d'exécution (ex: "26.1.2")
+    private static final String MC_VERSION = FabricLoader.getInstance()
+            .getModContainer("minecraft")
+            .map(container -> container.getMetadata().getVersion().getFriendlyString())
+            .orElse(null);
+
+    // Ne liste que les versions du mod publiées pour la version de Minecraft du joueur,
+    // sinon l'auto-updater installerait un jar incompatible (ex: jar 26.1 sur un client 1.21)
+    private static final String MODRINTH_API_URL = "https://api.modrinth.com/v2/project/guildzip/version"
+            + (MC_VERSION != null
+                ? "?loaders=%5B%22fabric%22%5D&game_versions=%5B%22" + MC_VERSION + "%22%5D"
+                : "");
     
     private static String latestVersionOnline = null;
-    private static ReleaseInfo latestReleaseInfo = null;
     
     /**
      * Vérifie la version en ligne et retourne un CompletableFuture
@@ -60,10 +45,9 @@ public class VersionManager {
                 GuildChatMod.LOGGER.info("Checking for updates from Modrinth...");
                 GuildChatMod.LOGGER.info("Current version: " + CURRENT_VERSION);
                 
-                ReleaseInfo releaseInfo = fetchLatestReleaseFromModrinth();
-                if (releaseInfo != null && releaseInfo.getVersion() != null) {
-                    latestReleaseInfo = releaseInfo;
-                    latestVersionOnline = releaseInfo.getVersion();
+                String version = fetchLatestVersionFromModrinth();
+                if (version != null) {
+                    latestVersionOnline = version;
                     GuildChatMod.LOGGER.info("Latest version on Modrinth: " + latestVersionOnline);
 
                     if (CURRENT_VERSION != null) {
@@ -90,7 +74,7 @@ public class VersionManager {
     /**
      * Récupère la dernière version depuis l'API Modrinth
      */
-    private static ReleaseInfo fetchLatestReleaseFromModrinth() throws Exception {
+    private static String fetchLatestVersionFromModrinth() throws Exception {
         GuildChatMod.LOGGER.info("Fetching from Modrinth: " + MODRINTH_API_URL);
 
         var url = new URI(MODRINTH_API_URL).toURL();
@@ -125,26 +109,7 @@ public class VersionManager {
 
                     String version = latestVersion.get("version_number").getAsString();
                     GuildChatMod.LOGGER.info("Found Modrinth version: " + version);
-
-                    // Récupérer le JAR depuis les fichiers
-                    if (latestVersion.has("files") && latestVersion.get("files").isJsonArray()) {
-                        JsonArray files = latestVersion.getAsJsonArray("files");
-                        for (JsonElement element : files) {
-                            if (!element.isJsonObject()) continue;
-                            JsonObject file = element.getAsJsonObject();
-                            if (!file.has("filename") || !file.has("url")) continue;
-
-                            String filename = file.get("filename").getAsString();
-                            String downloadUrl = file.get("url").getAsString();
-
-                            if (filename.endsWith(".jar")) {
-                                GuildChatMod.LOGGER.info("Selected Modrinth asset: " + filename);
-                                return new ReleaseInfo(version, filename, downloadUrl);
-                            }
-                        }
-                    }
-
-                    return new ReleaseInfo(version, null, null);
+                    return version;
                 }
             }
         } else {
@@ -180,16 +145,11 @@ public class VersionManager {
         return latestVersionOnline;
     }
 
-    public static ReleaseInfo getLatestReleaseInfo() {
-        return latestReleaseInfo;
-    }
-    
     /**
      * Réinitialise le cache de version (utile pour forcer une nouvelle vérification)
      */
     public static void resetVersionCache() {
         latestVersionOnline = null;
-        latestReleaseInfo = null;
     }
     
     /**

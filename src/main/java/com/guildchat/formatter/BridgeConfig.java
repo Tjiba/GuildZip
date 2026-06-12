@@ -49,9 +49,6 @@ public class BridgeConfig {
     // Langue de l'interface (english ou french)
     public String language = "english";
 
-    // Active le téléchargement automatique de la dernière version stable lorsqu'elle est disponible
-    public boolean autoUpdaterEnabled = true;
-
     // Masque la notification de mise à jour au démarrage
     public boolean hideUpdateNotification = false;
 
