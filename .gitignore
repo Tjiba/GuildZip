@@ -14,8 +14,15 @@
 /run/
 /out/
 /bin/
+/release/
 
 # OS cruft
 .DS_Store
 Thumbs.db
 *.log
+
+# Local workflow docs (specs/plans) — kept out of the repo
+/docs/superpowers/
+
+# Modrinth page description — kept local, pasted onto the Modrinth page
+/MODRINTH.md

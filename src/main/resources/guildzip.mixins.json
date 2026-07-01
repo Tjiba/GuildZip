@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.guildchat.formatter.mixin",
+  "package": "com.guildzip.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": ["ChatHudMixin"],
   "injectors": { "defaultRequire": 1 }

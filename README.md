@@ -1,68 +1,47 @@
 <div align="center">
 
-# 📂 GuildZip 📂
+# 📂 GuildZip
 
-**Your guild chat, finally readable.**
+### Your guild chat, finally readable.
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-26.1-brightgreen)](https://www.minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-26.2-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.19.3-orange)](https://fabricmc.net/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![Build](https://github.com/Tjiba/GuildZip/actions/workflows/build.yml/badge.svg)](https://github.com/Tjiba/GuildZip/actions/workflows/build.yml)
-![France](https://img.shields.io/badge/Made%20in-France-blue&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAKICAKICAKPC9zdmc+)
-
-**English** | [Français](README.fr.md)
 
 <img width="265" height="61" alt="preview" src="https://github.com/user-attachments/assets/39af7b73-32f2-4ae7-962c-0e8b86914a77" />
-
 
 </div>
 
 ---
 
-GuildZip reformats Hypixel guild chat messages — bridge, normal, and officer — into clean, compact lines. Drop it in your mods folder. It works instantly.
+GuildZip reformats your Hypixel **guild chat** into clean, compact lines — and it recognizes Discord **bridge** relays to rewrite those too.
 
-**Bridge** — `Guild > [MVP++] BotName: G > DiscordUser: hey` → `G > Bridge > DiscordUser : hey`
+## 👀 Before → after
 
-**With version tag** — `... [V2] G > DiscordUser: gg` → `G > V2 > DiscordUser : gg`
+| Hypixel sends | GuildZip shows |
+|---|---|
+| `Guild > [MVP++] PlayerName [RAT]: hello` | `G > PlayerName : hello` |
+| `Guild > [MVP++] BotName: G > DiscordUser: hey` | `G > Bridge > DiscordUser : hey` |
+| `Guild > [MVP++] BotName: [V2] G > DiscordUser: gg` | `G > V2 > DiscordUser : gg` |
 
-**Normal message** *(global mode)* — `Guild > [MVP++] PlayerName: hello` → `G > PlayerName : hello`
+Everything's tunable in `/gz` — full RGB colors, prefixes, and per-guild version labels. `/gz update` checks for a new version.
 
----
-
-## ✨ Features
-
-- 🤖 **Auto-detects** your bridge bot — no config needed
-- 🏷️ **Guild version labels** — V1 / V2 / V3 each with its own color
-- 🎨 **Custom alias & colors** — rename the bot, style every element independently
-- 🌐 **Global mode** — format all guild messages, not just bridge
-- 🔔 **Update notifier** — a chat message on Hypixel when a new version is available
-- 🌍 **EN / FR** — fully bilingual
+Needs **Fabric API** + **[Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)**. Cloth Config is optional, for the settings screen.
 
 ---
 
-## 📦 Requirements
+## ⚡ TL;DR — bridging several guilds
 
-- Minecraft 26.1+ · Fabric Loader 0.18+ · Fabric API · Java 25+
-- ModMenu + Cloth Config *(optional — for the graphical config screen)*
-- Still on Minecraft 1.21.x? Use **[GuildZip 1.4.8](https://modrinth.com/mod/guildzip/versions)**, the final 1.21.x release
+Running one Discord bridge across multiple guilds? Have the bot tag each guild's messages with `[V1]` / `[V2]` / `[V3]`, set **Bot MC Name** to the bridge account in `/gz`, and every guild lands in your chat as its own colored, labeled line.
 
----
-
-## ⚙️ Commands
-
-```
-/gz           Open config screen
-/gz update    Check for updates
-```
-
----
+Need the bridge itself? → **[Minecraft-Bridge-Chat](https://github.com/FrenchLegacy/Minecraft-Bridge-Chat)**
 
 <div align="center">
 
-[⬇ Download](https://github.com/Tjiba/GuildZip/releases) &nbsp;·&nbsp; [🐛 Report a bug](https://github.com/Tjiba/GuildZip/issues) &nbsp;·&nbsp; [📝 Changelog](CHANGELOG.md)
+[Download](https://github.com/Tjiba/GuildZip/releases) · [Report a bug](https://github.com/Tjiba/GuildZip/issues) · [Changelog](CHANGELOG.md)
 
 <br>
 
-Made with ❤️ by **[Tjiba](https://github.com/Tjiba)** &nbsp;·&nbsp; ⭐ Star if it helps
+Made by [Tjiba](https://github.com/Tjiba)
 
 </div>

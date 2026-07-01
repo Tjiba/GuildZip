@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 - 2026-07-01
+- ⬆️ **Updated to Minecraft 26.2**
+- 🎨 **Full RGB colors** — every element (prefixes, alias, names, version labels) is now a color picker instead of the 16 Minecraft color codes
+- 🧭 **Reworked config screen** — cleaner categories (General / Colors / Version tags); `/gz` now opens the settings directly and no longer requires Mod Menu (Cloth Config is enough)
+- 🌍 **English only** — removed the French translation and the language option
+- 🧑‍💻 **Rewritten in Kotlin** (the chat mixin stays in Java) — leaner codebase, same behavior; now requires **Fabric Language Kotlin**
+- 🧹 Internal: package renamed to `com.guildzip`, chat parsing extracted to a testable formatter, dead code removed
+
 ## 1.5.0 - 2026-06-12
 - ⬆️ **Ported to Minecraft 26.1.x** (26.1 is unobfuscated: migrated from Yarn to official Mojang names)
 - ☕ Now requires Java 25 (Minecraft 26.1 requirement)

@@ -3,21 +3,24 @@
   "id": "guildzip",
   "version": "${version}",
   "name": "GuildZip",
-  "description": "Formate les messages bridge Discord dans la guild Hypixel. Commandes: /gz, /gz update",
+  "description": "Reformats Hypixel guild Discord bridge chat into clean, compact lines. Commands: /gz, /gz update",
   "authors": ["Tjiba"],
   "license": "MIT",
   "icon": "icon256.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.guildchat.formatter.GuildChatMod"],
-    "modmenu": ["com.guildchat.formatter.config.ModMenuIntegration"]
+    "client": [
+      { "adapter": "kotlin", "value": "com.guildzip.GuildZipMod" }
+    ],
+    "modmenu": ["com.guildzip.ModMenuIntegration"]
   },
   "mixins": ["guildzip.mixins.json"],
   "depends": {
     "fabricloader": ">=0.18.0",
-    "minecraft": "~26.1",
+    "minecraft": "~26.2",
     "java": ">=25",
-    "fabric-api": "*"
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*"
   },
   "contact": {
     "website": "https://modrinth.com/mod/guildzip"
