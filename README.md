@@ -32,9 +32,12 @@ Needs **Fabric API** + **[Fabric Language Kotlin](https://modrinth.com/mod/fabri
 
 ## ⚡ TL;DR — bridging several guilds
 
-Running one Discord bridge across multiple guilds? Have the bot tag each guild's messages with `[V1]` / `[V2]` / `[V3]`, set **Bot MC Name** to the bridge account in `/gz`, and every guild lands in your chat as its own colored, labeled line.
+<div align="center">
 
 Need the bridge itself? → **[Minecraft-Bridge-Chat](https://github.com/FrenchLegacy/Minecraft-Bridge-Chat)**
+
+Running one Discord bridge across multiple guilds? Have the bot tag each guild's messages with `[V1]` / `[V2]` / `[V3]`, set **Bot MC Name** to the bridge account in `/gz`, and every guild lands in your chat as its own colored, labeled line.
+
 
 ---
 
