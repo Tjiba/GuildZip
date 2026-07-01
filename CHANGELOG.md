@@ -1,7 +1,7 @@
 # Changelog
 
 ## 1.6.0 - 2026-07-01
-- ⬆️ **Updated to Minecraft 26.2**
+- 📦 **Builds for Minecraft 26.1 and 26.2** (pick the jar matching your version)
 - 🎨 **Full RGB colors** — every element (prefixes, alias, names, version labels) is now a color picker instead of the 16 Minecraft color codes
 - 🧭 **Reworked config screen** — cleaner categories (General / Colors / Version tags); `/gz` now opens the settings directly and no longer requires Mod Menu (Cloth Config is enough)
 - 🌍 **English only** — removed the French translation and the language option

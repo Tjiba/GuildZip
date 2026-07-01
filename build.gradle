@@ -4,9 +4,18 @@ plugins {
     id 'maven-publish'
 }
 
+// Target Minecraft version — pick with -Pmc=26.1 or -Pmc=26.2 (default: 26.2)
+def mcTarget = (project.findProperty('mc') ?: '26.2').toString()
+def mcSets = [
+    '26.1': [minecraft: '26.1.2', fabric_api: '0.151.0+26.1.2', cloth: '26.1.154',  modmenu: '18.0.0-beta.1'],
+    '26.2': [minecraft: '26.2',   fabric_api: '0.153.0+26.2',   cloth: '26.2.155',   modmenu: '19.0.0-alpha.1'],
+]
+def mcv = mcSets[mcTarget]
+if (mcv == null) throw new GradleException("Unknown -Pmc=${mcTarget} (use 26.1 or 26.2)")
+
 version = project.mod_version
 group = project.maven_group
-base { archivesName = project.archives_base_name }
+base { archivesName = "${project.archives_base_name}-mc${mcTarget}" }
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
@@ -16,16 +25,16 @@ repositories {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    minecraft "com.mojang:minecraft:${mcv.minecraft}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${mcv.fabric_api}"
     implementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 
-    compileOnly("com.terraformersmc:modmenu:${project.modmenu_version}") {
+    compileOnly("com.terraformersmc:modmenu:${mcv.modmenu}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
+    api("me.shedaniel.cloth:cloth-config-fabric:${mcv.cloth}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
@@ -42,12 +51,12 @@ loom {
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "minecraft_range", mcTarget
     duplicatesStrategy = 'EXCLUDE'
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-               "minecraft_version": project.minecraft_version
+               "minecraft_range": mcTarget
     }
 }
 
