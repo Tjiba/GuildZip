@@ -27,22 +27,18 @@ object Updater {
         (MC_VERSION?.let { "?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$it%22%5D" } ?: "")
 
     private const val MODRINTH_PAGE = "https://modrinth.com/mod/guildzip"
-    private val PREFIX_COLORS = intArrayOf(
-        0x8F96BE, 0x8886B4, 0x8175AA, 0x7A65A1, 0x735597,
-        0x6C448D, 0x653483, 0x5E247A, 0x571370, 0x500366)
-
     private var latest: String? = null
     private var notified = false
 
     fun init() {
         ClientPlayConnectionEvents.JOIN.register { _, _, client ->
-            if (notified || Config.get().hideUpdateNotification || !isHypixel(client)) return@register
+            if (notified || !Settings.updateNotifications || !isHypixel(client)) return@register
             CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS).execute {
                 check().thenRun {
                     val v = latest ?: return@thenRun
                     if (notified || compareVersions(CURRENT_VERSION, v) >= 0) return@thenRun
                     notified = true
-                    send(client, updateMessage(v))
+                    send(client, updateMessage())
                 }
             }
         }
@@ -58,7 +54,7 @@ object Updater {
             }
             val cmp = compareVersions(CURRENT_VERSION, v)
             val msg = when {
-                cmp < 0 -> updateMessage(v)
+                cmp < 0 -> updateMessage()
                 cmp > 0 -> Component.literal(Msg.UPDATE_DEV_VERSION.format(CURRENT_VERSION, v))
                 else -> Component.literal(Msg.UPDATE_UP_TO_DATE.format(CURRENT_VERSION))
             }
@@ -107,21 +103,13 @@ object Updater {
         client?.execute { client.player?.sendSystemMessage(msg) }
     }
 
-    private fun updateMessage(v: String): Component =
+    private fun updateMessage(): Component =
         Component.literal("").append(prefix())
-            .append(Component.literal(" " + Msg.UPDATE_AVAILABLE.format(v, CURRENT_VERSION)))
+            .append(Component.literal(Msg.UPDATE_AVAILABLE.get()))
             .withStyle { it
                 .withClickEvent(ClickEvent.OpenUrl(URI.create(MODRINTH_PAGE)))
                 .withHoverEvent(HoverEvent.ShowText(Component.literal(MODRINTH_PAGE)))
             }
 
-    private fun prefix(): MutableComponent {
-        var comp: MutableComponent? = null
-        "[GuildZip]".forEachIndexed { i, ch ->
-            val part = Component.literal(ch.toString())
-                .withStyle { it.withColor(PREFIX_COLORS[i]).withBold(true) }
-            comp = comp?.append(part) ?: part
-        }
-        return comp!!
-    }
+    private fun prefix(): MutableComponent = Component.literal("§6[§dGuild§5Zip§6]")
 }

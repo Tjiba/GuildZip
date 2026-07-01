@@ -2,7 +2,7 @@ package com.guildzip
 
 enum class Msg(val text: String) {
     MOD_LOADED("GuildZip loaded!"),
-    UPDATE_AVAILABLE("§eNew update available! §7v%s (current: v%s) §6— click to open Modrinth."),
+    UPDATE_AVAILABLE("§8: New update Available , check on §2Modrinth."),
     UPDATE_CHECKING("§eChecking for updates..."),
     UPDATE_UP_TO_DATE("§aYou are using the latest version! §7(v%s)"),
     UPDATE_CHECK_FAILED("§cFailed to check for updates. Please check your internet connection."),

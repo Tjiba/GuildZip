@@ -1,7 +1,6 @@
 package com.guildzip.mixin;
 
 import com.guildzip.ChatFormatter;
-import com.guildzip.Config;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -21,7 +20,7 @@ public class ChatHudMixin {
     )
     private Component onAddMessage(Component original) {
         if (original == null) return null;
-        List<ChatFormatter.Seg> segs = ChatFormatter.INSTANCE.format(original.getString(), Config.get());
+        List<ChatFormatter.Seg> segs = ChatFormatter.INSTANCE.format(original.getString());
         if (segs == null) return original;
 
         MutableComponent out = Component.empty();

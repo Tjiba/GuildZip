@@ -11,8 +11,7 @@
   "entrypoints": {
     "client": [
       { "adapter": "kotlin", "value": "com.guildzip.GuildZipMod" }
-    ],
-    "modmenu": ["com.guildzip.ModMenuIntegration"]
+    ]
   },
   "mixins": ["guildzip.mixins.json"],
   "depends": {
@@ -20,7 +19,8 @@
     "minecraft": "~${minecraft_range}",
     "java": ">=25",
     "fabric-api": "*",
-    "fabric-language-kotlin": "*"
+    "fabric-language-kotlin": "*",
+    "resourcefulconfig": "*"
   },
   "contact": {
     "website": "https://modrinth.com/mod/guildzip"

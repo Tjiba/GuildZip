@@ -4,6 +4,8 @@ import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen
+import com.teamresourceful.resourcefulconfig.api.loader.Configurator
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
@@ -14,11 +16,12 @@ import kotlin.io.path.listDirectoryEntries
 
 object GuildZipMod : ClientModInitializer {
     @JvmField val LOGGER = LoggerFactory.getLogger("guildzip")
+    private val configurator = Configurator("guildzip")
     private var pendingConfig = false
 
     override fun onInitializeClient() {
         LOGGER.info(Msg.MOD_LOADED.get())
-        Config.get()
+        Settings.register(configurator)
         cleanOldJars()
         Updater.init()
 
@@ -38,8 +41,8 @@ object GuildZipMod : ClientModInitializer {
             if (!pendingConfig) return@register
             pendingConfig = false
             val screen = openConfig(null)
-            if (screen != null) showScreen(client, screen)
-            else feedback(client, "Install Cloth Config to open the settings screen.")
+            if (screen != null) Screens.set(client, screen)
+            else feedback(client, "Failed to open the settings screen.")
         }
     }
 
@@ -63,16 +66,7 @@ object GuildZipMod : ClientModInitializer {
         mc?.player?.sendSystemMessage(Component.literal(msg))
     }
 
-    private fun openConfig(parent: Screen?): Screen? {
-        if (!FabricLoader.getInstance().isModLoaded("cloth-config")) return null
-        return runCatching { ConfigScreen.create(parent) }.getOrNull()
-    }
-
-    // 26.2 renamed Minecraft#setScreen to setScreenAndShow — call whichever exists.
-    private fun showScreen(client: Minecraft, screen: Screen) {
-        val cls = Minecraft::class.java
-        val method = runCatching { cls.getMethod("setScreenAndShow", Screen::class.java) }.getOrNull()
-            ?: cls.getMethod("setScreen", Screen::class.java)
-        method.invoke(client, screen)
-    }
+    private fun openConfig(parent: Screen?): Screen? = runCatching {
+        ResourcefulConfigScreen.getFactory("guildzip").apply(parent)
+    }.getOrNull()
 }

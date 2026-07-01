@@ -26,7 +26,7 @@ object ChatFormatter {
     private const val SEP = 0x555555   // séparateurs (gris foncé)
     private const val WHITE = 0xFFFFFF
 
-    fun format(input: String, cfg: Config): List<Seg>? {
+    fun format(input: String): List<Seg>? {
         val hadWarning = input.contains("Please be mindful of Discord links")
         val base = if (hadWarning) DISCORD_WARNING_SUFFIX.matcher(input).replaceAll("") else input
         val unchanged = if (hadWarning) listOf(Seg(base, null)) else null
@@ -46,23 +46,23 @@ object ChatFormatter {
         val botMC = m.group(3)
         val payload = m.group(5)
 
-        val botFilter = cfg.botMCName
+        val botFilter = Settings.botMcName.ifEmpty { null }
         if (botFilter != null && !botFilter.equals(botMC, ignoreCase = true)) return unchanged
 
         val channelMarker = extractChannelMarker(payload)
         val isBridgePayload = hasChannelMarker(payload) || hasGuildVersionTag(payload)
         val isOfficer = headerChannel.equals("Officer", true) || "O".equals(channelMarker, true)
-        if (!isBridgePayload && !cfg.formatAllGuild) return unchanged
+        if (!isBridgePayload && !Settings.formatAllGuild) return unchanged
 
-        val prefix = resolvePrefix(cfg, isOfficer)
-        val prefixColor = colorOf(cfg, if (isOfficer) cfg.officerPrefixColor else cfg.guildPrefixColor)
+        val prefix = resolvePrefix(isOfficer)
+        val prefixColor = colorOf(if (isOfficer) Colors.officerPrefixColor else Colors.guildPrefixColor)
 
         if (!isBridgePayload) {
             val message = payload.trim()
             if (message.isEmpty()) return unchanged
             return listOf(
                 Seg(prefix, prefixColor), Seg(" > ", SEP),
-                Seg(botMC, colorOf(cfg, cfg.discordNameColor)), Seg(": ", SEP),
+                Seg(botMC, colorOf(Colors.discordNameColor)), Seg(": ", SEP),
                 Seg(message, WHITE))
         }
 
@@ -94,28 +94,28 @@ object ChatFormatter {
         }
         if (discord.isEmpty() || message.isEmpty()) return unchanged
 
-        val useVersion = cfg.versionFormattingEnabled && !guildVersion.isNullOrBlank()
-        val versionOrAlias = if (useVersion) guildVersion!! else cfg.botAlias
-        val voaColor = if (cfg.randomMode) randomColor() else versionOrAliasColor(cfg, versionOrAlias, useVersion)
+        val useVersion = VersionTags.versionFormattingEnabled && !guildVersion.isNullOrBlank()
+        val versionOrAlias = if (useVersion) guildVersion!! else Settings.botAlias
+        val voaColor = if (Colors.randomMode) randomColor() else versionOrAliasColor(versionOrAlias, useVersion)
 
         return listOf(
             Seg(prefix, prefixColor), Seg(" > ", SEP),
             Seg(versionOrAlias, voaColor), Seg(" > ", SEP),
-            Seg(discord, colorOf(cfg, cfg.discordNameColor)), Seg(" : ", SEP),
+            Seg(discord, colorOf(Colors.discordNameColor)), Seg(" : ", SEP),
             Seg(message, WHITE))
     }
 
-    private fun colorOf(cfg: Config, color: Int) = if (cfg.randomMode) randomColor() else color
+    private fun colorOf(color: Int) = if (Colors.randomMode) randomColor() else (color and 0xFFFFFF)
 
     private fun randomColor() = RANDOM_COLORS[ThreadLocalRandom.current().nextInt(RANDOM_COLORS.size)]
 
-    private fun versionOrAliasColor(cfg: Config, versionOrAlias: String, useVersion: Boolean): Int {
-        if (!useVersion) return cfg.botAliasColor
+    private fun versionOrAliasColor(versionOrAlias: String, useVersion: Boolean): Int {
+        if (!useVersion) return Colors.botAliasColor and 0xFFFFFF
         return when (versionOrAlias.uppercase()) {
-            "V1" -> cfg.guildVersionV1Color
-            "V2" -> cfg.guildVersionV2Color
-            "V3" -> cfg.guildVersionV3Color
-            else -> cfg.botAliasColor
+            "V1" -> VersionTags.v1Color and 0xFFFFFF
+            "V2" -> VersionTags.v2Color and 0xFFFFFF
+            "V3" -> VersionTags.v3Color and 0xFFFFFF
+            else -> Colors.botAliasColor and 0xFFFFFF
         }
     }
 
@@ -125,9 +125,9 @@ object ChatFormatter {
         return if (m.matches()) m.group(1) else null
     }
 
-    private fun resolvePrefix(cfg: Config, isOfficer: Boolean): String {
-        val prefix = if (isOfficer) cfg.officerPrefix else cfg.guildPrefix
-        return if (prefix.isNullOrBlank()) (if (isOfficer) "O" else "G") else prefix.trim()
+    private fun resolvePrefix(isOfficer: Boolean): String {
+        val prefix = if (isOfficer) Settings.officerPrefix else Settings.guildPrefix
+        return if (prefix.isBlank()) (if (isOfficer) "O" else "G") else prefix.trim()
     }
 
     private fun hasChannelMarker(payload: String?): Boolean {

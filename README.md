@@ -26,7 +26,7 @@ GuildZip reformats your Hypixel **guild chat** into clean, compact lines — and
 
 Everything's tunable in `/gz` — full RGB colors, prefixes, and per-guild version labels. `/gz update` checks for a new version.
 
-Needs **Fabric API** + **[Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)**. Cloth Config is optional, for the settings screen.
+Needs **Fabric API** + **[Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)**. The config UI is bundled in — nothing else to install.
 
 ---
 
