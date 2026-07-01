@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📂 GuildZip
+# 📂 GuildZip 📂
 
 ### Your guild chat, finally readable.
 
@@ -36,12 +36,17 @@ Running one Discord bridge across multiple guilds? Have the bot tag each guild's
 
 Need the bridge itself? → **[Minecraft-Bridge-Chat](https://github.com/FrenchLegacy/Minecraft-Bridge-Chat)**
 
+---
+
 <div align="center">
 
-[Download](https://github.com/Tjiba/GuildZip/releases) · [Report a bug](https://github.com/Tjiba/GuildZip/issues) · [Changelog](CHANGELOG.md)
+Made with ❤️ by **[Tjiba](https://github.com/Tjiba)** • MeteoFrance in-game  
+rejoins notre guilde : [FrenchLegacy](https://frenchlegacy.fr)
+
+**[⬇ Download](https://github.com/Tjiba/GuildZip/releases)** &nbsp;·&nbsp; **[🐛 Report a bug](https://github.com/Tjiba/GuildZip/issues)** &nbsp;·&nbsp; **[📋 Changelog](https://github.com/Tjiba/GuildZip/blob/master/CHANGELOG.md)**
 
 <br>
 
-Made by [Tjiba](https://github.com/Tjiba)
+*⭐ If GuildZip helps you, a review goes a long way!*
 
 </div>
