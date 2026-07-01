@@ -2,7 +2,7 @@
 
 # 📂 GuildZip 📂
 
-### Your guild chat, finally readable.
+### Your Hypixel guild chat, finally readable.
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-26.2-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.19.3-orange)](https://fabricmc.net/)
